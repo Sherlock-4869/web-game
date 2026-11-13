@@ -1,0 +1,27 @@
+# Dependencies / package manager caches
+node_modules/
+.pnpm-store/
+.npm/
+
+# Vercel local project metadata
+.vercel/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local screenshots/captures
+screenshots/
+captures/
+*.webm
+*.mp4
+.vercel

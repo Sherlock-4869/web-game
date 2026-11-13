@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Tower Defense</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ====================== MAIN MENU ====================== -->
+    <div id="menu" class="screen">
+      <div class="menu-card">
+        <h1 class="logo">TOWER<span>DEFENSE</span></h1>
+        <p class="tagline">Build. Upgrade. Defend the line.</p>
+
+        <div class="menu-section">
+          <label class="menu-label">Difficulty</label>
+          <div id="difficultyButtons" class="diff-buttons">
+            <button class="diff-btn" data-diff="easy">Easy</button>
+            <button class="diff-btn active" data-diff="normal">Normal</button>
+            <button class="diff-btn" data-diff="hard">Hard</button>
+            <button class="diff-btn" data-diff="nightmare">Nightmare</button>
+          </div>
+        </div>
+
+        <div class="menu-actions">
+          <button id="btnNewGame" class="btn btn-primary">New Game</button>
+          <button id="btnContinue" class="btn">Continue</button>
+        </div>
+        <button id="btnCustomize" class="btn" style="width:100%;margin-top:12px">⚙ Customize values</button>
+        <p id="menuHint" class="menu-hint"></p>
+      </div>
+      <div class="menu-credit">Canvas · ES6 · No frameworks</div>
+    </div>
+
+    <!-- ====================== SETTINGS / SETUP ====================== -->
+    <div id="settings" class="screen hidden">
+      <header id="setHeader">
+        <h2>Game Setup — customize every value</h2>
+        <div id="setTabs" class="set-tabs"></div>
+      </header>
+      <div id="setBody"></div>
+    </div>
+
+    <!-- ====================== GAME ====================== -->
+    <div id="game" class="screen hidden">
+      <!-- Top HUD -->
+      <header id="topBar">
+        <div class="hud-group">
+          <div class="hud-stat" title="Lives remaining"><span class="ico">❤</span><span id="hudLives">20</span></div>
+          <div class="hud-stat" title="Gold"><span class="ico gold">⬤</span><span id="hudGold">100</span></div>
+          <div class="hud-stat" title="Wave"><span class="ico">≈</span>Wave <span id="hudWave">0</span></div>
+        </div>
+        <div class="hud-group center">
+          <div id="wavePreview" class="wave-preview"></div>
+        </div>
+        <div class="hud-group right">
+          <button id="btnStartWave" class="btn btn-small btn-primary">Start Wave</button>
+          <div class="speed-control">
+            <button class="spd-btn active" data-speed="1">1×</button>
+            <button class="spd-btn" data-speed="2">2×</button>
+            <button class="spd-btn" data-speed="3">3×</button>
+            <button class="spd-btn" data-speed="4">4×</button>
+            <button class="spd-btn" data-speed="5">5×</button>
+          </div>
+          <button id="btnPause" class="btn btn-small" title="Pause (Space)">⏸</button>
+          <button id="btnMute" class="btn btn-small" title="Mute">🔊</button>
+          <button id="btnFull" class="btn btn-small" title="Fullscreen">⛶</button>
+          <button id="btnMenu" class="btn btn-small" title="Menu">☰</button>
+        </div>
+      </header>
+
+      <!-- Wave mob tally (its own strip above the map) -->
+      <div id="waveTally" class="wave-tally-bar hidden"></div>
+
+      <!-- Main play area -->
+      <div id="playArea">
+        <div id="canvasWrap">
+          <canvas id="gameCanvas" width="1280" height="720"></canvas>
+          <div id="fireWarn" class="fire-warn hidden"></div>
+          <div id="overlayMsg" class="overlay-msg hidden"></div>
+        </div>
+
+        <!-- Right info panel -->
+        <aside id="sidePanel">
+          <div id="towerInfo" class="panel-card hidden"></div>
+          <div id="defaultInfo" class="panel-card">
+            <h3>Select a Tower</h3>
+            <p class="muted">Pick a tower from the bottom bar, then click a green tile to build. Hold <b>Shift</b> to place several at once. Click a placed tower to upgrade or sell it.</p>
+            <div class="legend">
+              <div><span class="chip n"></span>Normal</div>
+              <div><span class="chip f"></span>Fast</div>
+              <div><span class="chip t"></span>Tank</div>
+              <div><span class="chip a"></span>Armored</div>
+              <div><span class="chip fl"></span>Flying</div>
+              <div><span class="chip b"></span>Boss</div>
+            </div>
+          </div>
+          <div id="statsCard" class="panel-card stats-card"></div>
+        </aside>
+      </div>
+
+      <!-- Bottom toolbar -->
+      <footer id="toolbar"></footer>
+    </div>
+
+    <!-- ====================== TOOLTIP ====================== -->
+    <div id="tooltip" class="tooltip hidden"></div>
+  </div>
+
+  <!-- Load order matters (classic scripts so it runs via file://) -->
+  <script src="js/config.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/economy.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/guardian.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/projectile.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/tower.js"></script>
+  <script src="js/wave.js"></script>
+  <script src="js/upgrades.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/save.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

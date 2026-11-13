@@ -1,0 +1,1 @@
+Graphics are drawn procedurally on the HTML5 canvas and sounds are synthesized with the Web Audio API, so no binary assets are required to run the game. Drop custom effects assets here if you want to swap in your own art/audio.
