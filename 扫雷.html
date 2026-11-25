@@ -1,2 +1,951 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>扫雷</title><style>*{box-sizing:border-box}body{margin:0;background:#07111f;color:#e9f2ff;font:16px system-ui,-apple-system,"Microsoft YaHei",sans-serif}a{color:inherit;text-decoration:none}.wrap{max-width:1100px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.brand{font-size:22px;font-weight:800}.back{padding:9px 14px;border:1px solid #304968;border-radius:10px;background:#0e2036}.panel{background:#0d1d31;border:1px solid #24405f;border-radius:18px;padding:20px;box-shadow:0 16px 45px #0004}button{font:inherit;color:inherit;background:#163452;border:1px solid #38618a;border-radius:9px;padding:9px 14px;cursor:pointer}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.muted{color:#94acc7}.score{font-size:18px;color:#7de2ff}canvas{display:block;max-width:100%;margin:auto;background:#06101c;border-radius:12px;border:1px solid #284665}.memory{display:grid;grid-template-columns:repeat(4,72px);gap:10px;justify-content:center}.memory button{height:72px;font-size:30px;padding:0}.mine{display:grid;grid-template-columns:repeat(9,34px);gap:3px;justify-content:center}.mine button{width:34px;height:34px;padding:0;font-size:14px}@media(max-width:600px){.wrap{padding:16px}.memory{grid-template-columns:repeat(4,60px)}.memory button{height:60px}.mine{grid-template-columns:repeat(9,28px)}.mine button{width:28px;height:28px}}
-</style></head><body><main class="wrap"><header class="top"><a class="brand" href="index.html">🎮 像素游乐场</a><a class="back" href="index.html">← 返回大厅</a></header><section class="panel"><h1>💣 扫雷</h1><p class="muted">点击方块，找出所有安全区域。</p><div id="g" class="mine"></div><div class="actions"><button onclick="newG()">新游戏</button></div></section></main><script>let m,revealed,dead=false;function newG(){m=Array(81).fill(0);revealed=[];dead=false;let q=[...Array(81).keys()].sort(()=>Math.random()-.5).slice(0,10);q.forEach(i=>m[i]=-1);for(let i=0;i<81;i++)if(m[i]>=0){let x=i%9,y=i/9|0;m[i]=[-1,0,1].reduce((n,dy)=>n+[-1,0,1].filter(dx=>{let X=x+dx,Y=y+dy;return X>=0&&X<9&&Y>=0&&Y<9&&m[Y*9+X]===-1}).length,0)}draw()}function draw(){g.innerHTML=m.map((v,i)=>`<button onclick="openC(${i})">${revealed.includes(i)?(v<0?'💣':v||''):'■'}</button>`).join('')}function openC(i){if(dead||revealed.includes(i))return;if(m[i]<0){dead=true;revealed=m.map((v,j)=>v<0?j:-1).filter(j=>j>=0);draw();setTimeout(()=>alert('踩到地雷了！'),30);return}revealed.push(i);if(m[i]===0){let x=i%9,y=i/9|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){let X=x+dx,Y=y+dy;if(X>=0&&X<9&&Y>=0&&Y<9){let j=Y*9+X;if(!revealed.includes(j)&&m[j]>=0)openC(j)}}}draw();if(revealed.length===71)setTimeout(()=>alert('扫雷成功！'),30)}newG();</script></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>极客扫雷 Pro — 像素游乐场</title>
+  <link rel="stylesheet" href="assets/arcade-shell.css">
+  <script src="assets/arcade-sfx.js"></script>
+  <style>
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Prominent Dig / Flag Mode Toggle */
+    .mode-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      border-radius: 11px;
+      font: 700 13.5px/1 var(--font-sans);
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid rgba(92, 225, 230, 0.42);
+      background: linear-gradient(135deg, rgba(14, 48, 72, 0.88), rgba(18, 36, 64, 0.92));
+      color: var(--cyan);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
+      transition: all 0.16s ease;
+    }
+
+    .mode-toggle-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--cyan);
+    }
+
+    .mode-toggle-btn.is-flag-mode {
+      border-color: rgba(251, 113, 133, 0.68);
+      background: linear-gradient(135deg, rgba(136, 19, 55, 0.72), rgba(76, 15, 42, 0.88));
+      color: #ffe4e6;
+      box-shadow: 0 6px 18px rgba(244, 63, 94, 0.28);
+    }
+
+    .mode-pill-tag {
+      padding: 3px 7px;
+      border-radius: 6px;
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .stage-wrap {
+      position: relative;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(6, 12, 24, 0.92), rgba(9, 18, 35, 0.95));
+      border: 1px solid rgba(120, 175, 255, 0.2);
+      padding: 16px;
+      box-shadow: inset 0 2px 14px rgba(0, 0, 0, 0.52);
+      overflow: hidden;
+    }
+
+    .board-scroller {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      justify-content: safe center;
+      padding-bottom: 4px;
+    }
+
+    .board-scroller::-webkit-scrollbar {
+      height: 7px;
+    }
+    .board-scroller::-webkit-scrollbar-track {
+      background: rgba(15, 27, 48, 0.5);
+      border-radius: 999px;
+    }
+    .board-scroller::-webkit-scrollbar-thumb {
+      background: rgba(91, 157, 255, 0.35);
+      border-radius: 999px;
+    }
+
+    .mine-board {
+      display: grid;
+      grid-template-columns: repeat(var(--cols, 9), var(--cell-size, 36px));
+      grid-auto-rows: var(--cell-size, 36px);
+      gap: 3px;
+      padding: 8px;
+      border-radius: 14px;
+      background: rgba(14, 26, 48, 0.78);
+      border: 1px solid rgba(120, 175, 255, 0.14);
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      margin: 0 auto;
+    }
+
+    .mine-board.shake {
+      animation: boardShake 340ms cubic-bezier(.36, .07, .19, .97);
+    }
+
+    @keyframes boardShake {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+      40%, 60% { transform: translate3d(5px, 0, 0); }
+    }
+
+    .m-cell {
+      position: relative;
+      width: var(--cell-size, 36px);
+      height: var(--cell-size, 36px);
+      padding: 0;
+      border: 1px solid rgba(130, 188, 255, 0.24);
+      border-bottom-color: rgba(8, 16, 32, 0.7);
+      border-right-color: rgba(8, 16, 32, 0.7);
+      border-radius: 7px;
+      background: linear-gradient(155deg, #1b355b, #122542);
+      color: var(--text);
+      font: 800 15px/1 var(--font-mono);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.12s ease, transform 0.1s ease, border-color 0.12s ease;
+    }
+
+    .m-cell:not(.revealed):hover {
+      background: linear-gradient(155deg, #254778, #193258);
+      border-color: rgba(92, 225, 230, 0.55);
+    }
+
+    .m-cell:not(.revealed):active {
+      transform: scale(0.94);
+    }
+
+    .m-cell.flagged {
+      background: linear-gradient(155deg, #283354, #1a223b);
+      border-color: rgba(251, 113, 133, 0.48);
+    }
+
+    .m-cell.question {
+      color: var(--amber);
+      border-color: rgba(251, 191, 36, 0.45);
+    }
+
+    .m-cell.chord-hint {
+      background: rgba(92, 225, 230, 0.22) !important;
+      border-color: var(--cyan) !important;
+      transform: scale(0.93);
+    }
+
+    .m-cell.revealed {
+      background: rgba(8, 15, 30, 0.82);
+      border: 1px solid rgba(100, 150, 220, 0.09);
+      cursor: default;
+      animation: cellPopReveal 200ms cubic-bezier(0.2, 0.85, 0.3, 1) backwards;
+    }
+
+    .m-cell.revealed.has-num {
+      cursor: pointer;
+    }
+
+    .m-cell.revealed.has-num:hover {
+      background: rgba(20, 38, 68, 0.88);
+      border-color: rgba(120, 175, 255, 0.22);
+    }
+
+    @keyframes cellPopReveal {
+      0% { opacity: 0.35; transform: scale(0.82); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Crisp Color-Coded Numbers */
+    .n-1 { color: #5ce1e6; text-shadow: 0 0 10px rgba(92, 225, 230, 0.3); }
+    .n-2 { color: #34d399; text-shadow: 0 0 10px rgba(52, 211, 153, 0.28); }
+    .n-3 { color: #fb7185; text-shadow: 0 0 10px rgba(251, 113, 133, 0.3); }
+    .n-4 { color: #a78bfa; text-shadow: 0 0 10px rgba(167, 139, 250, 0.3); }
+    .n-5 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.28); }
+    .n-6 { color: #38bdf8; }
+    .n-7 { color: #f472b6; }
+    .n-8 { color: #e2e8f0; }
+
+    /* Explosion & Mine States */
+    .m-cell.mine-exploded {
+      background: radial-gradient(circle at 50% 50%, #fb7185, #be123c 72%) !important;
+      border-color: #fda4af !important;
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.72);
+      z-index: 2;
+      animation: boomPulse 420ms ease-out;
+    }
+
+    .m-cell.mine-shown {
+      background: rgba(127, 29, 29, 0.38);
+      border-color: rgba(248, 113, 113, 0.3);
+    }
+
+    .m-cell.wrong-flag {
+      background: rgba(120, 53, 15, 0.45);
+      border-color: rgba(251, 191, 36, 0.45);
+    }
+
+    @keyframes boomPulse {
+      0% { transform: scale(0.7); }
+      50% { transform: scale(1.22); }
+      100% { transform: scale(1); }
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .status-hint-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 12.5px;
+      color: var(--text-dim);
+    }
+
+    .safe-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(52, 211, 153, 0.13);
+      border: 1px solid rgba(52, 211, 153, 0.32);
+      color: var(--emerald);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    @media (max-width: 680px) {
+      .stage-wrap {
+        padding: 10px 8px;
+      }
+      .mine-board {
+        --cell-size: 33px !important;
+      }
+      .toolbar-row {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="arcade-page">
+    <header class="arcade-topbar">
+      <a class="arcade-brand" href="index.html">
+        <span class="arcade-brand-mark">🎮</span>
+        <span>像素游乐场</span>
+      </a>
+      <div class="arcade-nav-actions">
+        <button class="btn btn-ghost btn-sm" id="muteBtn" type="button">🔊 音效</button>
+        <a class="btn btn-ghost btn-sm" href="index.html">← 返回大厅</a>
+      </div>
+    </header>
+
+    <main class="game-shell">
+      <div class="game-header">
+        <div class="game-title-group">
+          <div class="game-icon">💣</div>
+          <div>
+            <h1>极客扫雷 Pro</h1>
+            <p class="game-subtitle">首击必开安全区 · 数字和弦快开 · 零失误排雷挑战</p>
+          </div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-pill rose">
+            <span class="label">💣 剩余雷数</span>
+            <span class="value" id="minesLeftVal">10</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">⏱️ 用时</span>
+            <span class="value" id="timerVal">000s</span>
+          </div>
+          <div class="stat-pill amber">
+            <span class="label">🏆 最佳纪录</span>
+            <span class="value" id="bestTimeVal">--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-row">
+        <div class="toolbar-group">
+          <div class="seg-group" id="diffGroup" role="tablist" aria-label="难度选择">
+            <button class="seg-btn active" type="button" data-diff="easy">初级 9×9 (10雷)</button>
+            <button class="seg-btn" type="button" data-diff="medium">中级 16×16 (40雷)</button>
+            <button class="seg-btn" type="button" data-diff="expert">大师 16×30 (99雷)</button>
+          </div>
+        </div>
+
+        <div class="toolbar-group">
+          <button class="mode-toggle-btn" id="modeToggleBtn" type="button" aria-pressed="false">
+            <span id="modeIcon">⛏️</span>
+            <span id="modeText">当前：翻开模式</span>
+            <span class="mode-pill-tag">点击切换 🚩</span>
+          </button>
+          <button class="btn btn-primary btn-sm" id="restartBtn" type="button">↻ 重新布雷</button>
+        </div>
+      </div>
+
+      <div class="stage-wrap">
+        <div class="status-hint-banner">
+          <span class="safe-badge" id="safeBadge">🛡️ 首击保护已就绪：第一击必开大片安全区</span>
+          <span id="progressText">进度：0%</span>
+        </div>
+
+        <div class="board-scroller">
+          <div class="mine-board" id="mineBoard" role="grid" aria-label="扫雷棋盘"></div>
+        </div>
+
+        <div class="modal-overlay hidden" id="resultOverlay">
+          <span class="modal-badge" id="resultBadge">CLEAR!</span>
+          <h2 id="resultTitle">排雷成功！</h2>
+          <p id="resultDesc">你已找出全部地雷，用时 0 秒。</p>
+          <div class="modal-actions">
+            <button class="btn" id="inspectBtn" type="button">🔍 查看盘面</button>
+            <button class="btn btn-primary" id="modalRestartBtn" type="button">↻ 再来一局</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="kbd-hints">
+        <span>🖱️ <strong>左键</strong> 翻开方块</span>
+        <span>🖱️ <strong>右键</strong> 标记 <kbd>🚩</kbd> / <kbd>?</kbd></span>
+        <span>⚡ <strong>点击已翻开数字</strong>（周围旗数=数字）自动和弦快开</span>
+        <span>📱 手机支持 <strong>顶部切换插旗模式</strong> 或 <strong>长按插旗</strong></span>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      ArcadeSFX.recordPlay('扫雷.html');
+
+      const DIFFICULTIES = {
+        easy:   { key: 'easy',   name: '初级 9×9',   rows: 9,  cols: 9,  mines: 10, cellPx: 38 },
+        medium: { key: 'medium', name: '中级 16×16', rows: 16, cols: 16, mines: 40, cellPx: 33 },
+        expert: { key: 'expert', name: '大师 16×30', rows: 16, cols: 30, mines: 99, cellPx: 30 }
+      };
+
+      const muteBtn = document.getElementById('muteBtn');
+      const minesLeftEl = document.getElementById('minesLeftVal');
+      const timerEl = document.getElementById('timerVal');
+      const bestTimeEl = document.getElementById('bestTimeVal');
+      const diffGroup = document.getElementById('diffGroup');
+      const modeToggleBtn = document.getElementById('modeToggleBtn');
+      const modeIcon = document.getElementById('modeIcon');
+      const modeText = document.getElementById('modeText');
+      const restartBtn = document.getElementById('restartBtn');
+      const mineBoard = document.getElementById('mineBoard');
+      const safeBadge = document.getElementById('safeBadge');
+      const progressText = document.getElementById('progressText');
+      const resultOverlay = document.getElementById('resultOverlay');
+      const resultBadge = document.getElementById('resultBadge');
+      const resultTitle = document.getElementById('resultTitle');
+      const resultDesc = document.getElementById('resultDesc');
+      const inspectBtn = document.getElementById('inspectBtn');
+      const modalRestartBtn = document.getElementById('modalRestartBtn');
+
+      let currentDiff = DIFFICULTIES.easy;
+      let rows = 9;
+      let cols = 9;
+      let totalMines = 10;
+
+      // Cell state arrays
+      let isMine = [];      // boolean
+      let adjCount = [];    // 0..8
+      let revealed = [];    // boolean
+      let markState = [];   // 0 = none, 1 = flag (🚩), 2 = question (?)
+      let cellEls = [];     // HTMLButtonElement[]
+
+      let minesGenerated = false;
+      let gameState = 'ready'; // 'ready' | 'playing' | 'won' | 'lost'
+      let flagMode = false;
+      let flagCount = 0;
+      let revealedCount = 0;
+      let elapsedSec = 0;
+      let timerId = null;
+
+      function syncMuteBtn() {
+        muteBtn.textContent = ArcadeSFX.isMuted() ? '🔇 静音' : '🔊 音效';
+      }
+      syncMuteBtn();
+      muteBtn.addEventListener('click', function () {
+        ArcadeSFX.toggleMute();
+        syncMuteBtn();
+      });
+
+      function bestStorageKey(diffKey) {
+        return 'pixel_minesweeper_best_v2_' + diffKey;
+      }
+
+      function getBestTime(diffKey) {
+        try {
+          const val = parseInt(localStorage.getItem(bestStorageKey(diffKey)) || '', 10);
+          return Number.isFinite(val) && val >= 0 ? val : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function saveBestTime(diffKey, sec) {
+        try {
+          localStorage.setItem(bestStorageKey(diffKey), String(sec));
+        } catch (e) {}
+      }
+
+      function formatTimer(sec) {
+        return String(Math.min(999, sec)).padStart(3, '0') + 's';
+      }
+
+      function stopTimer() {
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+      }
+
+      function startTimer() {
+        stopTimer();
+        timerId = setInterval(function () {
+          if (gameState !== 'playing') return;
+          elapsedSec++;
+          timerEl.textContent = formatTimer(elapsedSec);
+        }, 1000);
+      }
+
+      function syncHUD() {
+        minesLeftEl.textContent = String(totalMines - flagCount);
+        timerEl.textContent = formatTimer(elapsedSec);
+
+        const best = getBestTime(currentDiff.key);
+        bestTimeEl.textContent = best !== null ? (best + 's') : '--';
+
+        const safeCells = rows * cols - totalMines;
+        const pct = safeCells > 0 ? Math.floor((revealedCount / safeCells) * 100) : 0;
+        progressText.textContent = '安全区进度：' + pct + '% (' + revealedCount + '/' + safeCells + ')';
+      }
+
+      function setFlagMode(nextFlagMode) {
+        flagMode = nextFlagMode;
+        modeToggleBtn.classList.toggle('is-flag-mode', flagMode);
+        modeToggleBtn.setAttribute('aria-pressed', flagMode ? 'true' : 'false');
+        if (flagMode) {
+          modeIcon.textContent = '🚩';
+          modeText.textContent = '当前：插旗模式';
+        } else {
+          modeIcon.textContent = '⛏️';
+          modeText.textContent = '当前：翻开模式';
+        }
+      }
+
+      function neighborsOf(idx) {
+        const r = (idx / cols) | 0;
+        const c = idx % cols;
+        const list = [];
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const nr = r + dr;
+            const nc = c + dc;
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+              list.push(nr * cols + nc);
+            }
+          }
+        }
+        return list;
+      }
+
+      // Guarantee (safeIdx) and all 8 neighbors have 0 mines!
+      function generateMines(safeIdx) {
+        const safeR = (safeIdx / cols) | 0;
+        const safeC = safeIdx % cols;
+        const candidates = [];
+
+        for (let i = 0; i < rows * cols; i++) {
+          const r = (i / cols) | 0;
+          const c = i % cols;
+          if (Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1) continue;
+          candidates.push(i);
+        }
+
+        // Fisher-Yates shuffle
+        for (let i = candidates.length - 1; i > 0; i--) {
+          const j = (Math.random() * (i + 1)) | 0;
+          const tmp = candidates[i];
+          candidates[i] = candidates[j];
+          candidates[j] = tmp;
+        }
+
+        for (let k = 0; k < totalMines && k < candidates.length; k++) {
+          isMine[candidates[k]] = true;
+        }
+
+        for (let i = 0; i < rows * cols; i++) {
+          if (isMine[i]) continue;
+          const nbs = neighborsOf(i);
+          let count = 0;
+          for (let j = 0; j < nbs.length; j++) {
+            if (isMine[nbs[j]]) count++;
+          }
+          adjCount[i] = count;
+        }
+
+        minesGenerated = true;
+        safeBadge.textContent = '⚡ 雷区已锁定：请谨慎推理排雷';
+        safeBadge.style.color = 'var(--cyan)';
+        safeBadge.style.borderColor = 'rgba(92, 225, 230, 0.35)';
+        safeBadge.style.background = 'rgba(92, 225, 230, 0.12)';
+      }
+
+      function updateCellVisual(idx, delayMs) {
+        const el = cellEls[idx];
+        if (!el) return;
+
+        if (revealed[idx]) {
+          el.className = 'm-cell revealed';
+          if (delayMs > 0) {
+            el.style.animationDelay = Math.min(220, delayMs) + 'ms';
+          } else {
+            el.style.animationDelay = '0ms';
+          }
+          const n = adjCount[idx];
+          if (n > 0) {
+            el.classList.add('has-num', 'n-' + n);
+            el.textContent = String(n);
+          } else {
+            el.textContent = '';
+          }
+          return;
+        }
+
+        el.style.animationDelay = '0ms';
+        if (markState[idx] === 1) {
+          el.className = 'm-cell flagged';
+          el.textContent = '🚩';
+        } else if (markState[idx] === 2) {
+          el.className = 'm-cell question';
+          el.textContent = '?';
+        } else {
+          el.className = 'm-cell';
+          el.textContent = '';
+        }
+      }
+
+      function initGame() {
+        stopTimer();
+        rows = currentDiff.rows;
+        cols = currentDiff.cols;
+        totalMines = currentDiff.mines;
+        const total = rows * cols;
+
+        isMine = Array(total).fill(false);
+        adjCount = Array(total).fill(0);
+        revealed = Array(total).fill(false);
+        markState = Array(total).fill(0);
+        cellEls = new Array(total);
+
+        minesGenerated = false;
+        gameState = 'ready';
+        flagCount = 0;
+        revealedCount = 0;
+        elapsedSec = 0;
+
+        resultOverlay.classList.add('hidden');
+        mineBoard.classList.remove('shake');
+        mineBoard.style.setProperty('--cols', String(cols));
+        mineBoard.style.setProperty('--cell-size', currentDiff.cellPx + 'px');
+
+        safeBadge.textContent = '🛡️ 首击保护已就绪：第一击必开大片安全区';
+        safeBadge.style.color = 'var(--emerald)';
+        safeBadge.style.borderColor = 'rgba(52, 211, 153, 0.32)';
+        safeBadge.style.background = 'rgba(52, 211, 153, 0.13)';
+
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < total; i++) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'm-cell';
+          btn.dataset.idx = String(i);
+          btn.setAttribute('aria-label', '格子 ' + (i + 1));
+          cellEls[i] = btn;
+          frag.appendChild(btn);
+        }
+        mineBoard.innerHTML = '';
+        mineBoard.appendChild(frag);
+
+        syncHUD();
+      }
+
+      function triggerLoss(explodedIndices) {
+        gameState = 'lost';
+        stopTimer();
+        mineBoard.classList.add('shake');
+        ArcadeSFX.play('boom');
+        setTimeout(function () {
+          ArcadeSFX.play('lose');
+        }, 220);
+
+        const explodedSet = new Set(explodedIndices);
+        const total = rows * cols;
+        for (let i = 0; i < total; i++) {
+          const el = cellEls[i];
+          if (explodedSet.has(i)) {
+            el.className = 'm-cell revealed mine-exploded';
+            el.textContent = '💥';
+          } else if (isMine[i] && markState[i] !== 1) {
+            el.className = 'm-cell revealed mine-shown';
+            el.textContent = '💣';
+          } else if (!isMine[i] && markState[i] === 1) {
+            el.className = 'm-cell revealed wrong-flag';
+            el.textContent = '❌';
+          }
+        }
+
+        setTimeout(function () {
+          if (gameState !== 'lost') return;
+          resultBadge.textContent = '💥 BOOM · 触雷失败';
+          resultBadge.style.color = 'var(--rose)';
+          resultBadge.style.borderColor = 'rgba(251, 113, 133, 0.45)';
+          resultBadge.style.background = 'rgba(251, 113, 133, 0.14)';
+          resultTitle.textContent = '不小心踩到地雷了！';
+          resultDesc.textContent = '已坚持 ' + elapsedSec + ' 秒 · 排除安全区 ' + revealedCount + ' 格。可查看失误位置或直接重开。';
+          resultOverlay.classList.remove('hidden');
+        }, 480);
+      }
+
+      function checkWinCondition() {
+        const safeTotal = rows * cols - totalMines;
+        if (revealedCount < safeTotal) return false;
+
+        gameState = 'won';
+        stopTimer();
+
+        // Auto-flag remaining mines
+        for (let i = 0; i < rows * cols; i++) {
+          if (isMine[i] && markState[i] !== 1) {
+            markState[i] = 1;
+            flagCount++;
+            updateCellVisual(i, 0);
+          }
+        }
+
+        const prevBest = getBestTime(currentDiff.key);
+        const isNewRecord = prevBest === null || elapsedSec < prevBest;
+        if (isNewRecord) {
+          saveBestTime(currentDiff.key, elapsedSec);
+        }
+        syncHUD();
+        ArcadeSFX.play('win');
+
+        setTimeout(function () {
+          if (gameState !== 'won') return;
+          resultBadge.textContent = isNewRecord ? '🏆 NEW RECORD!' : '✨ MISSION CLEAR';
+          resultBadge.style.color = 'var(--emerald)';
+          resultBadge.style.borderColor = 'rgba(52, 211, 153, 0.45)';
+          resultBadge.style.background = 'rgba(52, 211, 153, 0.16)';
+          resultTitle.textContent = isNewRecord ? '破纪录通关！' : '完美扫雷成功！';
+          resultDesc.textContent = currentDiff.name + ' 通关用时 ' + elapsedSec + ' 秒' +
+            (isNewRecord ? '（刷新本难度最佳成绩！）' : '（最佳纪录 ' + prevBest + ' 秒）');
+          resultOverlay.classList.remove('hidden');
+        }, 280);
+
+        return true;
+      }
+
+      // Flood-fill reveal starting from one or more seed indices
+      function revealSeeds(seedIndices) {
+        if (gameState === 'won' || gameState === 'lost') return;
+
+        const validSeeds = seedIndices.filter(function (idx) {
+          return !revealed[idx] && markState[idx] !== 1;
+        });
+        if (!validSeeds.length) return;
+
+        if (!minesGenerated) {
+          // Guarantee first seed + its 8 neighbors are mine-free
+          if (markState[validSeeds[0]] === 2) markState[validSeeds[0]] = 0;
+          generateMines(validSeeds[0]);
+          gameState = 'playing';
+          startTimer();
+        }
+
+        // Check if any seed is a mine
+        const hitMines = validSeeds.filter(function (idx) { return isMine[idx]; });
+        if (hitMines.length > 0) {
+          triggerLoss(hitMines);
+          return;
+        }
+
+        const originR = (validSeeds[0] / cols) | 0;
+        const originC = validSeeds[0] % cols;
+
+        const queue = [];
+        let openedCount = 0;
+
+        for (let i = 0; i < validSeeds.length; i++) {
+          const s = validSeeds[i];
+          if (revealed[s] || markState[s] === 1) continue;
+          if (markState[s] === 2) markState[s] = 0;
+          revealed[s] = true;
+          revealedCount++;
+          openedCount++;
+          const dist = Math.abs(((s / cols) | 0) - originR) + Math.abs((s % cols) - originC);
+          updateCellVisual(s, dist * 16);
+          if (adjCount[s] === 0) {
+            queue.push(s);
+          }
+        }
+
+        let head = 0;
+        while (head < queue.length) {
+          const cur = queue[head++];
+          const nbs = neighborsOf(cur);
+          for (let j = 0; j < nbs.length; j++) {
+            const nb = nbs[j];
+            if (revealed[nb] || markState[nb] === 1 || isMine[nb]) continue;
+            if (markState[nb] === 2) markState[nb] = 0;
+            revealed[nb] = true;
+            revealedCount++;
+            openedCount++;
+            const dist = Math.abs(((nb / cols) | 0) - originR) + Math.abs((nb % cols) - originC);
+            updateCellVisual(nb, dist * 16);
+            if (adjCount[nb] === 0) {
+              queue.push(nb);
+            }
+          }
+        }
+
+        syncHUD();
+        if (!checkWinCondition() && openedCount > 0) {
+          if (openedCount >= 5) {
+            ArcadeSFX.play('clear');
+          } else {
+            ArcadeSFX.play('click');
+          }
+        }
+      }
+
+      // Cycle mark: cycleQuestion=true => none -> 🚩 -> ? -> none; cycleQuestion=false => none <-> 🚩
+      function toggleMark(idx, cycleQuestion) {
+        if (gameState === 'won' || gameState === 'lost') return;
+        if (revealed[idx]) return;
+
+        if (markState[idx] === 0) {
+          markState[idx] = 1;
+          flagCount++;
+          ArcadeSFX.play('flag');
+        } else if (markState[idx] === 1) {
+          flagCount--;
+          markState[idx] = cycleQuestion ? 2 : 0;
+          ArcadeSFX.play('click');
+        } else {
+          markState[idx] = 0;
+          ArcadeSFX.play('click');
+        }
+        updateCellVisual(idx, 0);
+        syncHUD();
+      }
+
+      // Chord click on an already revealed numbered cell
+      function chordCell(idx) {
+        if (gameState !== 'playing') return;
+        if (!revealed[idx] || adjCount[idx] <= 0) return;
+
+        const nbs = neighborsOf(idx);
+        let adjFlags = 0;
+        const unflaggedHidden = [];
+
+        for (let i = 0; i < nbs.length; i++) {
+          const nb = nbs[i];
+          if (markState[nb] === 1) adjFlags++;
+          else if (!revealed[nb]) unflaggedHidden.push(nb);
+        }
+
+        if (!unflaggedHidden.length) return;
+
+        if (adjFlags === adjCount[idx]) {
+          revealSeeds(unflaggedHidden);
+        } else {
+          // Subtle chord-hint pulse on unrevealed neighbors
+          ArcadeSFX.play('move');
+          for (let i = 0; i < unflaggedHidden.length; i++) {
+            cellEls[unflaggedHidden[i]].classList.add('chord-hint');
+          }
+          setTimeout(function () {
+            for (let i = 0; i < unflaggedHidden.length; i++) {
+              if (cellEls[unflaggedHidden[i]]) {
+                cellEls[unflaggedHidden[i]].classList.remove('chord-hint');
+              }
+            }
+          }, 210);
+        }
+      }
+
+      // Pointer & Touch Long-Press Handling
+      let longPressTimer = null;
+      let longPressTriggered = false;
+      let touchStartX = 0;
+      let touchStartY = 0;
+
+      function cancelLongPress() {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      }
+
+      mineBoard.addEventListener('pointerdown', function (e) {
+        const cell = e.target.closest('.m-cell');
+        if (!cell) return;
+        const idx = parseInt(cell.dataset.idx, 10);
+
+        if (e.pointerType === 'touch') {
+          longPressTriggered = false;
+          touchStartX = e.clientX;
+          touchStartY = e.clientY;
+          cancelLongPress();
+          if (!revealed[idx] && gameState !== 'won' && gameState !== 'lost') {
+            longPressTimer = setTimeout(function () {
+              longPressTriggered = true;
+              toggleMark(idx, false);
+              if (navigator.vibrate) {
+                try { navigator.vibrate(18); } catch (err) {}
+              }
+            }, 340);
+          }
+        }
+      });
+
+      mineBoard.addEventListener('pointermove', function (e) {
+        if (!longPressTimer) return;
+        if (Math.abs(e.clientX - touchStartX) > 10 || Math.abs(e.clientY - touchStartY) > 10) {
+          cancelLongPress();
+        }
+      });
+
+      mineBoard.addEventListener('pointerup', cancelLongPress);
+      mineBoard.addEventListener('pointercancel', cancelLongPress);
+
+      mineBoard.addEventListener('click', function (e) {
+        if (longPressTriggered) {
+          longPressTriggered = false;
+          e.preventDefault();
+          return;
+        }
+        const cell = e.target.closest('.m-cell');
+        if (!cell) return;
+        const idx = parseInt(cell.dataset.idx, 10);
+
+        if (revealed[idx]) {
+          chordCell(idx);
+          return;
+        }
+
+        if (flagMode) {
+          toggleMark(idx, false);
+        } else {
+          if (markState[idx] === 1) return;
+          revealSeeds([idx]);
+        }
+      });
+
+      mineBoard.addEventListener('contextmenu', function (e) {
+        const cell = e.target.closest('.m-cell');
+        if (!cell) return;
+        e.preventDefault();
+        const idx = parseInt(cell.dataset.idx, 10);
+        if (revealed[idx]) {
+          chordCell(idx);
+        } else {
+          toggleMark(idx, true);
+        }
+      });
+
+      // Controls wiring
+      diffGroup.addEventListener('click', function (e) {
+        const btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        const key = btn.dataset.diff;
+        if (!DIFFICULTIES[key] || DIFFICULTIES[key] === currentDiff) return;
+        currentDiff = DIFFICULTIES[key];
+        document.querySelectorAll('#diffGroup .seg-btn').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.diff === key);
+        });
+        ArcadeSFX.play('click');
+        initGame();
+      });
+
+      modeToggleBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        setFlagMode(!flagMode);
+      });
+
+      restartBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        initGame();
+      });
+
+      modalRestartBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        initGame();
+      });
+
+      inspectBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        resultOverlay.classList.add('hidden');
+      });
+
+      window.addEventListener('keydown', function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        if (e.key === 'f' || e.key === 'F') {
+          e.preventDefault();
+          ArcadeSFX.play('click');
+          setFlagMode(!flagMode);
+        } else if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          ArcadeSFX.play('click');
+          initGame();
+        }
+      });
+
+      initGame();
+    })();
+  </script>
+</body>
+</html>

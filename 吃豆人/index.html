@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>经典吃豆人 PAC-MAN · 像素游乐场</title>
+  <script>window.google = {};</script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 16px 28px;
+      background:
+        radial-gradient(700px 420px at 50% 25%, rgba(250, 204, 21, 0.12), transparent 65%),
+        radial-gradient(800px 500px at 20% 80%, rgba(59, 130, 246, 0.14), transparent 65%),
+        #060a14;
+      color: #eef5ff;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .cabinet-card {
+      background: rgba(13, 23, 42, 0.86);
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      border-radius: 22px;
+      padding: 24px 26px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65), inset 0 0 30px rgba(250, 204, 21, 0.04);
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .cabinet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .cabinet-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fde047;
+      letter-spacing: 0.04em;
+    }
+
+    .badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(250, 204, 21, 0.14);
+      border: 1px solid rgba(250, 204, 21, 0.35);
+      color: #fef08a;
+    }
+
+    .screen-scroll {
+      max-width: 100%;
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 2px solid #1e3a8a;
+      box-shadow: 0 0 24px rgba(37, 99, 235, 0.35);
+      background: #000;
+      padding: 8px;
+    }
+
+    td { line-height: .8em; }
+    #wrapper {
+      width: 554px;
+      height: 186px;
+      margin: 0 auto;
+      background: #000;
+      position: relative;
+    }
+    #logo {
+      width: 554px;
+      height: 186px;
+      background: black url(src/pacman10-hp.gif) 0 0 no-repeat;
+      position: relative;
+    }
+    #logo-l {
+      width: 200px;
+      height: 3px;
+      left: 177px;
+      top: 157px;
+      background: #422006;
+      position: absolute;
+      display: none;
+      overflow: hidden;
+      border-radius: 99px;
+    }
+    #logo-b {
+      position: absolute;
+      left: 0;
+      background: #facc15;
+      height: 8px;
+      width: 0;
+    }
+
+    form { margin: 18px 0 8px; }
+    .coin-btn {
+      font: 700 15px/1 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      padding: 12px 24px;
+      border-radius: 999px;
+      border: 1px solid rgba(250, 204, 21, 0.65);
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      color: #090d16;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(234, 179, 8, 0.32);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .coin-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(250, 204, 21, 0.48);
+    }
+
+    .tips {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #93abc8;
+    }
+    .tips b { color: #fde68a; }
+
+    .mobile-dpad {
+      display: none;
+      margin: 16px auto 0;
+      width: 186px;
+      grid-template-columns: repeat(3, 56px);
+      grid-template-rows: repeat(2, 52px);
+      gap: 8px;
+    }
+    .mobile-dpad button {
+      border-radius: 12px;
+      background: rgba(30, 58, 138, 0.45);
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      color: #fef08a;
+      font-size: 20px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .mobile-dpad button:active {
+      background: rgba(250, 204, 21, 0.35);
+    }
+    @media (pointer: coarse), (max-width: 720px) {
+      .mobile-dpad { display: grid; }
+      .cabinet-card { padding: 16px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cabinet-card">
+    <div class="cabinet-header">
+      <div class="cabinet-title">🍒 PAC-MAN 经典吃豆人</div>
+      <span class="badge">30 周年街机复刻</span>
+    </div>
+
+    <div class="screen-scroll">
+      <div id="wrapper">
+        <a href="#gameover" id="dlink"></a>
+        <div id="logo" title="PAC-MAN 30th Anniversary Arcade">
+          <div id="logo-l"><div id="logo-b"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <form action="#submit" name="f">
+      <input name="btnI" type="submit" value="🪙 投币重开 / 再投一币开启双人模式" class="coin-btn">
+    </form>
+
+    <div class="tips">
+      1P 控制：<b>方向键 ↑ ↓ ← →</b>　|　2P Ms. PAC-MAN（再次点击投币激活）：<b>W A S D</b>
+    </div>
+
+    <div class="mobile-dpad">
+      <div></div>
+      <button type="button" data-kc="38" aria-label="上">▲</button>
+      <div></div>
+      <button type="button" data-kc="37" aria-label="左">◀</button>
+      <button type="button" data-kc="40" aria-label="下">▼</button>
+      <button type="button" data-kc="39" aria-label="右">▶</button>
+    </div>
+  </div>
+
+  <script>
+    google.dom = {};
+    google.pacManSound = true;
+    google.browser = {};
+    google.browser.engine = { IE: false };
+
+    google.dom.remove = function (a) {
+      return a && a.parentNode && a.parentNode.removeChild(a);
+    };
+    google.dom.append = function (a) {
+      return document.body.appendChild(a);
+    };
+
+    google.pml = function () {
+      function d(a) {
+        if (!google.pml_installed) {
+          google.pml_installed = true;
+          if (!a) {
+            document.getElementById("logo").style.background = "black";
+            window.setTimeout(function () {
+              var b = document.getElementById("logo-l");
+              if (b) b.style.display = "block";
+            }, 200);
+          }
+          a = document.createElement("script");
+          a.type = "text/javascript";
+          a.src = "src/js/pacman10-hp.3.js";
+          document.body.appendChild(a);
+        }
+      }
+      function e() {
+        if (document.f && document.f.btnI) {
+          document.f.btnI.onclick = function () {
+            if (typeof google.pacman !== "undefined") {
+              google.pacman.insertCoin();
+            } else {
+              d(false);
+            }
+            return false;
+          };
+        }
+      }
+      if (!google.pml_loaded) {
+        google.pml_loaded = true;
+        window.setTimeout(function () {
+          document.f && d(false);
+        }, 250);
+        e();
+      }
+    };
+    google.pml();
+
+    // Mobile virtual pad -> keyboard events
+    document.querySelectorAll('.mobile-dpad button').forEach(function (btn) {
+      btn.addEventListener('pointerdown', function (ev) {
+        ev.preventDefault();
+        var kc = Number(btn.getAttribute('data-kc'));
+        var evt = new KeyboardEvent('keydown', { keyCode: kc, which: kc, bubbles: true });
+        Object.defineProperty(evt, 'keyCode', { get: function () { return kc; } });
+        Object.defineProperty(evt, 'which', { get: function () { return kc; } });
+        document.dispatchEvent(evt);
+      });
+    });
+  </script>
+  <script src="../assets/arcade-nav.js" data-home="../index.html" data-pos="top-left" data-game-id="吃豆人/index.html"></script>
+</body>
+</html>

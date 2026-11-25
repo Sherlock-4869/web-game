@@ -1,0 +1,1329 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>国风极夜五子棋 · AI 对弈 — 像素游乐场</title>
+  <link rel="stylesheet" href="assets/arcade-shell.css">
+  <script src="assets/arcade-sfx.js"></script>
+  <style>
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .seg-group.is-disabled {
+      opacity: 0.42;
+      pointer-events: none;
+    }
+
+    .turn-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 16px;
+      margin-bottom: 14px;
+      border-radius: 13px;
+      background: rgba(8, 16, 32, 0.72);
+      border: 1px solid rgba(120, 175, 255, 0.16);
+    }
+
+    .turn-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14.5px;
+    }
+
+    .stone-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .stone-dot.black {
+      background: radial-gradient(circle at 35% 32%, #64748b, #0f172a 65%, #020617);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+    }
+
+    .stone-dot.white {
+      background: radial-gradient(circle at 35% 32%, #ffffff, #dbeafe 70%, #94a3b8);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .turn-meta {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    .board-stage {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(6, 11, 22, 0.88), rgba(10, 18, 34, 0.94));
+      border: 1px solid rgba(120, 175, 255, 0.18);
+      box-shadow: inset 0 2px 16px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
+    }
+
+    .canvas-holder {
+      position: relative;
+      width: min(100%, 580px);
+      aspect-ratio: 1 / 1;
+    }
+
+    #gomokuCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      cursor: pointer;
+      touch-action: manipulation;
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.52);
+    }
+
+    .btn[disabled] {
+      opacity: 0.42;
+      pointer-events: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 640px) {
+      .toolbar-row {
+        justify-content: center;
+      }
+      .board-stage {
+        padding: 8px;
+      }
+      .turn-banner {
+        padding: 8px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="arcade-page">
+    <header class="arcade-topbar">
+      <a class="arcade-brand" href="index.html">
+        <span class="arcade-brand-mark">🎮</span>
+        <span>像素游乐场</span>
+      </a>
+      <div class="arcade-nav-actions">
+        <button class="btn btn-ghost btn-sm" id="muteBtn" type="button">🔊 音效</button>
+        <a class="btn btn-ghost btn-sm" href="index.html">← 返回大厅</a>
+      </div>
+    </header>
+
+    <main class="game-shell">
+      <div class="game-header">
+        <div class="game-title-group">
+          <div class="game-icon">⚫</div>
+          <div>
+            <h1>国风极夜五子棋</h1>
+            <p class="game-subtitle">15×15 标准棋盘 · 智能棋型博弈 AI · 鎏金黑曜与榧木双主题</p>
+          </div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-pill emerald">
+            <span class="label">🏆 玩家胜场</span>
+            <span class="value" id="winsVal">0</span>
+          </div>
+          <div class="stat-pill amber">
+            <span class="label">🤝 平局</span>
+            <span class="value" id="drawsVal">0</span>
+          </div>
+          <div class="stat-pill rose">
+            <span class="label">🤖 AI 胜场</span>
+            <span class="value" id="lossesVal">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">📍 手数</span>
+            <span class="value" id="stepVal">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-row">
+        <div class="toolbar-group">
+          <div class="seg-group" id="modeGroup" role="tablist" aria-label="对弈模式">
+            <button class="seg-btn active" type="button" data-mode="pve-black">🤖 人机 (执黑先手)</button>
+            <button class="seg-btn" type="button" data-mode="pve-white">🤖 人机 (执白后手)</button>
+            <button class="seg-btn" type="button" data-mode="pvp">👥 双人同屏</button>
+          </div>
+        </div>
+
+        <div class="toolbar-group">
+          <div class="seg-group" id="aiDiffGroup" role="tablist" aria-label="AI 难度">
+            <button class="seg-btn" type="button" data-ai="casual">休闲</button>
+            <button class="seg-btn active" type="button" data-ai="advanced">进阶</button>
+            <button class="seg-btn" type="button" data-ai="master">大师</button>
+          </div>
+
+          <div class="seg-group" id="boardThemeGroup" role="tablist" aria-label="棋盘材质">
+            <button class="seg-btn active" type="button" data-btheme="obsidian">鎏金黑曜</button>
+            <button class="seg-btn" type="button" data-btheme="wood">雅致榧木</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="turn-banner">
+        <div class="turn-indicator">
+          <span class="stone-dot black" id="turnStoneDot"></span>
+          <span id="turnStatusText">执黑先行 · 请落子</span>
+        </div>
+        <div class="toolbar-group">
+          <span class="turn-meta" id="lastCoordText">最新落子：--</span>
+          <button class="btn btn-sm" id="undoBtn" type="button" disabled>↩ 悔棋</button>
+          <button class="btn btn-primary btn-sm" id="restartBtn" type="button">↻ 重新开局</button>
+        </div>
+      </div>
+
+      <div class="board-stage">
+        <div class="canvas-holder" id="canvasHolder">
+          <canvas id="gomokuCanvas"></canvas>
+        </div>
+
+        <div class="modal-overlay hidden" id="endOverlay">
+          <span class="modal-badge" id="endBadge">FIVE IN A ROW</span>
+          <h2 id="endTitle">黑方获胜！</h2>
+          <p id="endDesc">五子连珠，精彩绝伦！</p>
+          <div class="modal-actions">
+            <button class="btn" id="reviewBtn" type="button">🔍 复盘查看</button>
+            <button class="btn btn-primary" id="againBtn" type="button">↻ 再战一局</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="kbd-hints">
+        <span>🖱️ 移动预览落点，点击交叉点落子</span>
+        <span>🧠 <strong>大师 AI</strong> 支持活四/冲四/双活三前瞻算杀</span>
+        <span><kbd>Z</kbd> 悔棋 · <kbd>R</kbd> 重新开局</span>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      ArcadeSFX.recordPlay('五子棋.html');
+
+      const N = 15;
+      const EMPTY = 0;
+      const BLACK = 1;
+      const WHITE = 2;
+      const DIRS = [
+        [0, 1],
+        [1, 0],
+        [1, 1],
+        [1, -1]
+      ];
+      const COL_LABELS = 'ABCDEFGHIJKLMNO';
+      const STAR_POINTS = [
+        [3, 3], [3, 11], [7, 7], [11, 3], [11, 11]
+      ];
+
+      // ============================================================
+      // Exact 9-Cell Line Pattern Lookup Table (3^8 = 6,561 states)
+      // Pattern codes:
+      // 0: None, 1: Sleep2, 2: Live2, 3: Sleep3, 4: Live3, 5: Rush4, 6: Live4, 7: Five
+      // ============================================================
+      const P_NONE   = 0;
+      const P_SLEEP2 = 1;
+      const P_LIVE2  = 2;
+      const P_SLEEP3 = 3;
+      const P_LIVE3  = 4;
+      const P_RUSH4  = 5;
+      const P_LIVE4  = 6;
+      const P_FIVE   = 7;
+
+      const PATTERN_SCORES = [0, 95, 580, 1100, 7200, 11500, 110000, 1000000];
+      const PATTERN_LUT = new Uint8Array(6561);
+      const POW3 = [1, 3, 9, 27, 81, 243, 729, 2187];
+
+      (function initPatternLUT() {
+        const w = new Uint8Array(9);
+
+        function hasFive(arr) {
+          for (let i = 0; i <= 4; i++) {
+            if (arr[i] === 1 && arr[i + 1] === 1 && arr[i + 2] === 1 && arr[i + 3] === 1 && arr[i + 4] === 1) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        function countWinMoves(arr) {
+          let wins = 0;
+          for (let p = 0; p < 9; p++) {
+            if (arr[p] !== 0) continue;
+            arr[p] = 1;
+            if (hasFive(arr)) wins++;
+            arr[p] = 0;
+          }
+          return wins;
+        }
+
+        for (let code = 0; code < 6561; code++) {
+          let tmp = code;
+          for (let idx = 0; idx < 8; idx++) {
+            const pos = idx < 4 ? idx : idx + 1;
+            w[pos] = tmp % 3;
+            tmp = (tmp / 3) | 0;
+          }
+          w[4] = 1;
+
+          if (hasFive(w)) {
+            PATTERN_LUT[code] = P_FIVE;
+            continue;
+          }
+
+          const c5 = countWinMoves(w);
+          if (c5 >= 2) {
+            PATTERN_LUT[code] = P_LIVE4;
+            continue;
+          }
+          if (c5 === 1) {
+            PATTERN_LUT[code] = P_RUSH4;
+            continue;
+          }
+
+          let makesLive4 = false;
+          let makesRush4 = false;
+          for (let p = 0; p < 9; p++) {
+            if (w[p] !== 0) continue;
+            w[p] = 1;
+            const nextWins = countWinMoves(w);
+            if (nextWins >= 2) makesLive4 = true;
+            else if (nextWins === 1) makesRush4 = true;
+            w[p] = 0;
+            if (makesLive4) break;
+          }
+
+          if (makesLive4) {
+            PATTERN_LUT[code] = P_LIVE3;
+            continue;
+          }
+          if (makesRush4) {
+            PATTERN_LUT[code] = P_SLEEP3;
+            continue;
+          }
+
+          // Check Live 2: adding 1 stone creates Live 3
+          let makesLive3 = false;
+          for (let p = 1; p <= 7; p++) {
+            if (w[p] !== 0) continue;
+            w[p] = 1;
+            for (let q = 0; q < 9; q++) {
+              if (w[q] !== 0) continue;
+              w[q] = 1;
+              if (countWinMoves(w) >= 2) {
+                makesLive3 = true;
+              }
+              w[q] = 0;
+              if (makesLive3) break;
+            }
+            w[p] = 0;
+            if (makesLive3) break;
+          }
+
+          if (makesLive3) {
+            PATTERN_LUT[code] = P_LIVE2;
+            continue;
+          }
+
+          let openTwo = false;
+          for (let i = 0; i <= 4; i++) {
+            let ones = 0;
+            let blocked = false;
+            for (let k = 0; k < 5; k++) {
+              const v = w[i + k];
+              if (v === 2) { blocked = true; break; }
+              if (v === 1) ones++;
+            }
+            if (!blocked && ones >= 2) {
+              openTwo = true;
+              break;
+            }
+          }
+          PATTERN_LUT[code] = openTwo ? P_SLEEP2 : P_NONE;
+        }
+      })();
+
+      // DOM elements
+      const muteBtn = document.getElementById('muteBtn');
+      const winsValEl = document.getElementById('winsVal');
+      const drawsValEl = document.getElementById('drawsVal');
+      const lossesValEl = document.getElementById('lossesVal');
+      const stepValEl = document.getElementById('stepVal');
+      const modeGroup = document.getElementById('modeGroup');
+      const aiDiffGroup = document.getElementById('aiDiffGroup');
+      const boardThemeGroup = document.getElementById('boardThemeGroup');
+      const turnStoneDot = document.getElementById('turnStoneDot');
+      const turnStatusText = document.getElementById('turnStatusText');
+      const lastCoordText = document.getElementById('lastCoordText');
+      const undoBtn = document.getElementById('undoBtn');
+      const restartBtn = document.getElementById('restartBtn');
+      const canvasHolder = document.getElementById('canvasHolder');
+      const canvas = document.getElementById('gomokuCanvas');
+      const ctx = canvas.getContext('2d');
+      const endOverlay = document.getElementById('endOverlay');
+      const endBadge = document.getElementById('endBadge');
+      const endTitle = document.getElementById('endTitle');
+      const endDesc = document.getElementById('endDesc');
+      const reviewBtn = document.getElementById('reviewBtn');
+      const againBtn = document.getElementById('againBtn');
+
+      // Game State
+      let board = new Uint8Array(N * N);
+      let moveHistory = []; // { r, c, color }
+      let currentTurn = BLACK;
+      let gameMode = 'pve-black'; // 'pve-black' | 'pve-white' | 'pvp'
+      let aiDifficulty = 'advanced'; // 'casual' | 'advanced' | 'master'
+      let boardTheme = 'obsidian'; // 'obsidian' | 'wood'
+      let gameOver = false;
+      let winLine = null; // [{r,c}, ...5]
+      let winBeamProgress = 0;
+      let animRafId = null;
+      let hoverCell = null; // { r, c }
+      let aiThinking = false;
+      let sessionToken = 0;
+
+      // Offscreen wood texture cache
+      let woodCanvas = null;
+      let woodCacheSize = 0;
+
+      // Canvas layout metrics (CSS pixels)
+      let viewSize = 560;
+      let padPx = 34;
+      let gridStep = 35;
+
+      function syncMuteBtn() {
+        muteBtn.textContent = ArcadeSFX.isMuted() ? '🔇 静音' : '🔊 音效';
+      }
+      syncMuteBtn();
+      muteBtn.addEventListener('click', function () {
+        ArcadeSFX.toggleMute();
+        syncMuteBtn();
+      });
+
+      // Crisp jade/wood stone placement SFX
+      function playStoneSFX(color) {
+        if (color === BLACK) {
+          ArcadeSFX.tone(760, 'triangle', 0.036, 0.13, 240);
+          ArcadeSFX.tone(175, 'sine', 0.055, 0.11, 88);
+        } else {
+          ArcadeSFX.tone(920, 'triangle', 0.034, 0.12, 310);
+          ArcadeSFX.tone(210, 'sine', 0.05, 0.10, 105);
+        }
+      }
+
+      const STATS_KEY = 'pixel_gomoku_stats_v1';
+      function loadStats() {
+        try {
+          const s = JSON.parse(localStorage.getItem(STATS_KEY) || '{}');
+          return {
+            wins: s.wins | 0,
+            draws: s.draws | 0,
+            losses: s.losses | 0
+          };
+        } catch (e) {
+          return { wins: 0, draws: 0, losses: 0 };
+        }
+      }
+
+      function saveStats(stats) {
+        try {
+          localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+        } catch (e) {}
+      }
+
+      let stats = loadStats();
+
+      function formatCoord(r, c) {
+        return COL_LABELS[c] + (N - r);
+      }
+
+      function isHumanTurn() {
+        if (gameMode === 'pvp') return true;
+        if (gameMode === 'pve-black') return currentTurn === BLACK;
+        return currentTurn === WHITE;
+      }
+
+      function humanColor() {
+        return gameMode === 'pve-white' ? WHITE : BLACK;
+      }
+
+      function aiColor() {
+        return gameMode === 'pve-white' ? BLACK : WHITE;
+      }
+
+      function syncHUD() {
+        winsValEl.textContent = String(stats.wins);
+        drawsValEl.textContent = String(stats.draws);
+        lossesValEl.textContent = String(stats.losses);
+        stepValEl.textContent = String(moveHistory.length);
+
+        const last = moveHistory.length ? moveHistory[moveHistory.length - 1] : null;
+        lastCoordText.textContent = last
+          ? ('最新：' + (last.color === BLACK ? '黑 ' : '白 ') + formatCoord(last.r, last.c))
+          : '最新落子：--';
+
+        turnStoneDot.className = 'stone-dot ' + (currentTurn === BLACK ? 'black' : 'white');
+
+        if (gameOver) {
+          if (winLine) {
+            const winner = board[winLine[0].r * N + winLine[0].c];
+            turnStatusText.textContent = (winner === BLACK ? '⚫ 黑方' : '⚪ 白方') + ' 五子连珠获胜！';
+          } else {
+            turnStatusText.textContent = '🤝 棋盘已满 · 双方平局';
+          }
+        } else if (aiThinking) {
+          turnStatusText.textContent = '🤖 AI 正在推演棋路...';
+        } else if (gameMode === 'pvp') {
+          turnStatusText.textContent = currentTurn === BLACK ? '⚫ 黑方回合 · 请落子' : '⚪ 白方回合 · 请落子';
+        } else {
+          turnStatusText.textContent = isHumanTurn()
+            ? ((currentTurn === BLACK ? '⚫ 轮到你（黑棋）' : '⚪ 轮到你（白棋）') + ' · 请落子')
+            : '🤖 等待 AI 落子...';
+        }
+
+        // Undo availability
+        let canUndo = false;
+        if (!aiThinking && moveHistory.length > 0) {
+          if (gameMode === 'pvp') {
+            canUndo = true;
+          } else if (gameMode === 'pve-white') {
+            // Keep AI's opening stone if only 1 move exists
+            canUndo = moveHistory.length >= 2;
+          } else {
+            canUndo = moveHistory.length >= 1;
+          }
+        }
+        undoBtn.disabled = !canUndo;
+
+        aiDiffGroup.classList.toggle('is-disabled', gameMode === 'pvp');
+      }
+
+      // ============================================================
+      // Evaluation & AI Engine
+      // ============================================================
+      function evalPointForColor(b, r, c, color) {
+        let total = 0;
+        let rush4 = 0;
+        let live3 = 0;
+        let live2 = 0;
+
+        for (let d = 0; d < 4; d++) {
+          const dr = DIRS[d][0];
+          const dc = DIRS[d][1];
+          let code = 0;
+          let idx = 0;
+          for (let k = -4; k <= 4; k++) {
+            if (k === 0) continue;
+            const nr = r + dr * k;
+            const nc = c + dc * k;
+            let cellCode = 2;
+            if (nr >= 0 && nr < N && nc >= 0 && nc < N) {
+              const v = b[nr * N + nc];
+              if (v === EMPTY) cellCode = 0;
+              else if (v === color) cellCode = 1;
+              else cellCode = 2;
+            }
+            if (cellCode !== 0) {
+              code += cellCode * POW3[idx];
+            }
+            idx++;
+          }
+
+          const pat = PATTERN_LUT[code];
+          if (pat === P_FIVE) return 1000000;
+          total += PATTERN_SCORES[pat];
+          if (pat === P_LIVE4) return 120000;
+          if (pat === P_RUSH4) rush4++;
+          else if (pat === P_LIVE3) live3++;
+          else if (pat === P_LIVE2) live2++;
+        }
+
+        // Decisive multi-direction fork combinations
+        if (rush4 >= 2) total += 95000;
+        else if (rush4 >= 1 && live3 >= 1) total += 82000;
+        else if (live3 >= 2) total += 48000;
+        else if (live3 >= 1 && live2 >= 1) total += 2400;
+        else if (live2 >= 2) total += 900;
+
+        // Slight center-control positional preference (max +28 at 天元)
+        const centerBias = (7 - Math.abs(r - 7)) + (7 - Math.abs(c - 7));
+        return total + centerBias * 2;
+      }
+
+      function generateCandidates(b, maxCount, perspectiveColor, defWeight) {
+        const opp = perspectiveColor === BLACK ? WHITE : BLACK;
+        const list = [];
+
+        for (let r = 0; r < N; r++) {
+          for (let c = 0; c < N; c++) {
+            if (b[r * N + c] !== EMPTY) continue;
+            // Check if any stone within Chebyshev radius 2
+            let near = false;
+            const rMin = Math.max(0, r - 2);
+            const rMax = Math.min(N - 1, r + 2);
+            const cMin = Math.max(0, c - 2);
+            const cMax = Math.min(N - 1, c + 2);
+            for (let nr = rMin; nr <= rMax && !near; nr++) {
+              const rowOff = nr * N;
+              for (let nc = cMin; nc <= cMax; nc++) {
+                if (b[rowOff + nc] !== EMPTY) {
+                  near = true;
+                  break;
+                }
+              }
+            }
+            if (!near) continue;
+
+            const atk = evalPointForColor(b, r, c, perspectiveColor);
+            const def = evalPointForColor(b, r, c, opp);
+            const combined = atk * 1.08 + def * defWeight;
+            list.push({ r: r, c: c, atk: atk, def: def, score: combined });
+          }
+        }
+
+        list.sort(function (a, bItem) { return bItem.score - a.score; });
+        return maxCount && list.length > maxCount ? list.slice(0, maxCount) : list;
+      }
+
+      // Negamax with Alpha-Beta over incremental tactical deltas
+      function negamax(b, depth, turnColor, alpha, beta, accScore) {
+        if (depth === 0) return accScore;
+
+        const width = depth >= 2 ? 10 : 8;
+        const cands = generateCandidates(b, width, turnColor, 1.02);
+        if (!cands.length) return 0;
+
+        // Immediate winning move shortcut
+        if (cands[0].atk >= 110000) {
+          return 200000 + depth * 10000;
+        }
+
+        const nextColor = turnColor === BLACK ? WHITE : BLACK;
+        let best = -Infinity;
+
+        for (let i = 0; i < cands.length; i++) {
+          const m = cands[i];
+          const moveGain = m.atk + m.def * 0.92;
+          b[m.r * N + m.c] = turnColor;
+          const val = -negamax(b, depth - 1, nextColor, -beta, -alpha, -(accScore + moveGain));
+          b[m.r * N + m.c] = EMPTY;
+
+          if (val > best) best = val;
+          if (val > alpha) alpha = val;
+          if (alpha >= beta) break;
+        }
+        return best;
+      }
+
+      function chooseAIMove() {
+        const me = aiColor();
+        const opp = humanColor();
+
+        // Opening book
+        if (moveHistory.length === 0) {
+          return { r: 7, c: 7 };
+        }
+        if (moveHistory.length === 1) {
+          const first = moveHistory[0];
+          if (first.r === 7 && first.c === 7) {
+            const opts = [[6, 6], [6, 8], [8, 6], [8, 8], [6, 7], [7, 6]];
+            const pick = opts[(Math.random() * opts.length) | 0];
+            return { r: pick[0], c: pick[1] };
+          }
+          const tr = first.r + (first.r < 7 ? 1 : first.r > 7 ? -1 : 0);
+          const tc = first.c + (first.c < 7 ? 1 : first.c > 7 ? -1 : 1);
+          if (board[7 * N + 7] === EMPTY && Math.abs(first.r - 7) <= 2 && Math.abs(first.c - 7) <= 2) {
+            return { r: tr, c: tc };
+          }
+          if (board[7 * N + 7] === EMPTY) return { r: 7, c: 7 };
+        }
+
+        // Casual AI: shallower defense + small top-3 variety
+        if (aiDifficulty === 'casual') {
+          const cands = generateCandidates(board, 8, me, 0.85);
+          if (!cands.length) return { r: 7, c: 7 };
+          // Still take immediate 5 or block immediate 5
+          if (cands[0].atk >= 1000000 || cands[0].def >= 1000000) {
+            return { r: cands[0].r, c: cands[0].c };
+          }
+          const poolSize = Math.min(3, cands.length);
+          const filtered = cands.slice(0, poolSize).filter(function (x) {
+            return x.score >= cands[0].score * 0.55;
+          });
+          const chosen = filtered[(Math.random() * filtered.length) | 0];
+          return { r: chosen.r, c: chosen.c };
+        }
+
+        const rootLimit = aiDifficulty === 'master' ? 12 : 10;
+        const cands = generateCandidates(board, rootLimit, me, 1.05);
+        if (!cands.length) return { r: 7, c: 7 };
+
+        // 1. Immediate Five win
+        for (let i = 0; i < cands.length; i++) {
+          if (cands[i].atk >= 1000000) return { r: cands[i].r, c: cands[i].c };
+        }
+        // 2. Immediate block opponent Five
+        for (let i = 0; i < cands.length; i++) {
+          if (cands[i].def >= 1000000) return { r: cands[i].r, c: cands[i].c };
+        }
+        // 3. Unstoppable Live Four / Double-Four / Four-Three win
+        for (let i = 0; i < cands.length; i++) {
+          if (cands[i].atk >= 80000) return { r: cands[i].r, c: cands[i].c };
+        }
+
+        // Advanced: 2-ply lookahead; Master: 3-ply Alpha-Beta lookahead
+        const searchDepth = aiDifficulty === 'master' ? 2 : 1;
+        let bestMove = cands[0];
+        let bestVal = -Infinity;
+        let alpha = -Infinity;
+        const beta = Infinity;
+
+        for (let i = 0; i < cands.length; i++) {
+          const m = cands[i];
+          const rootGain = m.atk * 1.06 + m.def * 1.02;
+          board[m.r * N + m.c] = me;
+          const val = -negamax(board, searchDepth, opp, -beta, -alpha, -rootGain);
+          board[m.r * N + m.c] = EMPTY;
+
+          if (val > bestVal) {
+            bestVal = val;
+            bestMove = m;
+          }
+          if (val > alpha) alpha = val;
+        }
+
+        return { r: bestMove.r, c: bestMove.c };
+      }
+
+      // ============================================================
+      // Win / Draw Detection
+      // ============================================================
+      function findWinningLine(r, c, color) {
+        for (let d = 0; d < 4; d++) {
+          const dr = DIRS[d][0];
+          const dc = DIRS[d][1];
+          const line = [{ r: r, c: c }];
+
+          for (let step = 1; step < N; step++) {
+            const nr = r + dr * step;
+            const nc = c + dc * step;
+            if (nr < 0 || nr >= N || nc < 0 || nc >= N || board[nr * N + nc] !== color) break;
+            line.push({ r: nr, c: nc });
+          }
+          for (let step = 1; step < N; step++) {
+            const nr = r - dr * step;
+            const nc = c - dc * step;
+            if (nr < 0 || nr >= N || nc < 0 || nc >= N || board[nr * N + nc] !== color) break;
+            line.unshift({ r: nr, c: nc });
+          }
+
+          if (line.length >= 5) {
+            return line;
+          }
+        }
+        return null;
+      }
+
+      // ============================================================
+      // High-DPI Canvas Rendering
+      // ============================================================
+      function ensureWoodTexture(size) {
+        if (woodCanvas && woodCacheSize === size) return woodCanvas;
+        woodCacheSize = size;
+        woodCanvas = document.createElement('canvas');
+        woodCanvas.width = size;
+        woodCanvas.height = size;
+        const wctx = woodCanvas.getContext('2d');
+
+        const baseGrad = wctx.createLinearGradient(0, 0, size, size);
+        baseGrad.addColorStop(0, '#deb373');
+        baseGrad.addColorStop(0.5, '#cf9d59');
+        baseGrad.addColorStop(1, '#be8842');
+        wctx.fillStyle = baseGrad;
+        wctx.fillRect(0, 0, size, size);
+
+        // Subtle procedural Kaya wood grain lines
+        wctx.lineWidth = 1.2;
+        for (let i = 0; i < 90; i++) {
+          const yBase = (i / 90) * size;
+          wctx.strokeStyle = i % 2 === 0 ? 'rgba(110, 66, 22, 0.065)' : 'rgba(255, 232, 190, 0.06)';
+          wctx.beginPath();
+          for (let x = 0; x <= size; x += 16) {
+            const wave = Math.sin(x * 0.014 + i * 0.45) * 4.5 + Math.cos(x * 0.006 - i) * 2.5;
+            if (x === 0) wctx.moveTo(x, yBase + wave);
+            else wctx.lineTo(x, yBase + wave);
+          }
+          wctx.stroke();
+        }
+        return woodCanvas;
+      }
+
+      function resizeCanvas() {
+        const rect = canvasHolder.getBoundingClientRect();
+        viewSize = Math.max(260, Math.floor(rect.width));
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        canvas.width = Math.floor(viewSize * dpr);
+        canvas.height = Math.floor(viewSize * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        padPx = Math.round(viewSize * 0.068);
+        gridStep = (viewSize - padPx * 2) / (N - 1);
+        renderBoard();
+      }
+
+      function coordToPx(r, c) {
+        return {
+          x: padPx + c * gridStep,
+          y: padPx + r * gridStep
+        };
+      }
+
+      function pxToCoord(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const x = ((clientX - rect.left) / rect.width) * viewSize;
+        const y = ((clientY - rect.top) / rect.height) * viewSize;
+        const c = Math.round((x - padPx) / gridStep);
+        const r = Math.round((y - padPx) / gridStep);
+        if (r < 0 || r >= N || c < 0 || c >= N) return null;
+        const pt = coordToPx(r, c);
+        const dist = Math.hypot(x - pt.x, y - pt.y);
+        if (dist > gridStep * 0.58) return null;
+        return { r: r, c: c };
+      }
+
+      function drawStone(x, y, radius, color, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        // Soft cast shadow
+        ctx.beginPath();
+        ctx.arc(x + radius * 0.1, y + radius * 0.15, radius * 0.98, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+
+        if (color === BLACK) {
+          const grad = ctx.createRadialGradient(
+            x - radius * 0.32, y - radius * 0.34, radius * 0.08,
+            x, y, radius
+          );
+          grad.addColorStop(0, '#64748b');
+          grad.addColorStop(0.28, '#263244');
+          grad.addColorStop(0.72, '#0c121e');
+          grad.addColorStop(1, '#04070d');
+          ctx.fillStyle = grad;
+          ctx.fill();
+
+          ctx.lineWidth = 0.9;
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.28)';
+          ctx.stroke();
+        } else {
+          const grad = ctx.createRadialGradient(
+            x - radius * 0.32, y - radius * 0.34, radius * 0.08,
+            x, y, radius
+          );
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.45, '#f1f5f9');
+          grad.addColorStop(0.84, '#cbd5e1');
+          grad.addColorStop(1, '#94a3b8');
+          ctx.fillStyle = grad;
+          ctx.fill();
+
+          ctx.lineWidth = 0.9;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      function renderBoard(timestamp) {
+        const isObsidian = boardTheme === 'obsidian';
+        ctx.clearRect(0, 0, viewSize, viewSize);
+
+        // 1. Board Background
+        if (isObsidian) {
+          const bg = ctx.createLinearGradient(0, 0, viewSize, viewSize);
+          bg.addColorStop(0, '#0e1729');
+          bg.addColorStop(0.5, '#0a1220');
+          bg.addColorStop(1, '#070c18');
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, viewSize, viewSize);
+
+          const glow = ctx.createRadialGradient(
+            viewSize * 0.5, viewSize * 0.5, 10,
+            viewSize * 0.5, viewSize * 0.5, viewSize * 0.62
+          );
+          glow.addColorStop(0, 'rgba(217, 177, 102, 0.08)');
+          glow.addColorStop(1, 'transparent');
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, viewSize, viewSize);
+        } else {
+          const wood = ensureWoodTexture(Math.max(260, Math.round(viewSize)));
+          ctx.drawImage(wood, 0, 0, viewSize, viewSize);
+        }
+
+        // Outer decorative double frame
+        const frameInset = Math.max(6, padPx * 0.28);
+        ctx.strokeStyle = isObsidian ? 'rgba(224, 184, 108, 0.42)' : 'rgba(62, 36, 12, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(frameInset, frameInset, viewSize - frameInset * 2, viewSize - frameInset * 2);
+
+        // 2. Coordinates (A-O, 1-15)
+        if (viewSize >= 340) {
+          ctx.font = '600 ' + Math.max(9, Math.round(viewSize * 0.019)) + 'px var(--font-mono, monospace)';
+          ctx.fillStyle = isObsidian ? 'rgba(224, 184, 108, 0.52)' : 'rgba(68, 40, 14, 0.62)';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          for (let i = 0; i < N; i++) {
+            const pTop = coordToPx(0, i);
+            ctx.fillText(COL_LABELS[i], pTop.x, padPx * 0.52);
+            const pLeft = coordToPx(i, 0);
+            ctx.fillText(String(N - i), padPx * 0.5, pLeft.y);
+          }
+        }
+
+        // 3. Grid Lines
+        ctx.strokeStyle = isObsidian ? 'rgba(224, 184, 108, 0.48)' : 'rgba(56, 32, 10, 0.72)';
+        ctx.lineWidth = 1.1;
+        const start = padPx;
+        const end = padPx + (N - 1) * gridStep;
+
+        ctx.beginPath();
+        for (let i = 0; i < N; i++) {
+          const pos = Math.round((padPx + i * gridStep) * 2) / 2;
+          ctx.moveTo(start, pos);
+          ctx.lineTo(end, pos);
+          ctx.moveTo(pos, start);
+          ctx.lineTo(pos, end);
+        }
+        ctx.stroke();
+
+        // Bold outer grid boundary
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = isObsidian ? 'rgba(234, 198, 126, 0.72)' : 'rgba(48, 26, 8, 0.88)';
+        ctx.strokeRect(start, start, end - start, end - start);
+
+        // 4. Star Points (天元 + 四星)
+        for (let i = 0; i < STAR_POINTS.length; i++) {
+          const pt = coordToPx(STAR_POINTS[i][0], STAR_POINTS[i][1]);
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, Math.max(3, gridStep * 0.11), 0, Math.PI * 2);
+          ctx.fillStyle = isObsidian ? '#e5be73' : '#3a200b';
+          ctx.fill();
+        }
+
+        const stoneRadius = gridStep * 0.445;
+
+        // 5. Hover Ghost Stone
+        if (!gameOver && !aiThinking && hoverCell && isHumanTurn()) {
+          if (board[hoverCell.r * N + hoverCell.c] === EMPTY) {
+            const hp = coordToPx(hoverCell.r, hoverCell.c);
+            drawStone(hp.x, hp.y, stoneRadius, currentTurn, 0.42);
+            ctx.beginPath();
+            ctx.arc(hp.x, hp.y, stoneRadius + 2.5, 0, Math.PI * 2);
+            ctx.strokeStyle = isObsidian ? 'rgba(92, 225, 230, 0.65)' : 'rgba(15, 23, 42, 0.48)';
+            ctx.lineWidth = 1.3;
+            ctx.stroke();
+          }
+        }
+
+        // 6. Placed Stones
+        for (let r = 0; r < N; r++) {
+          for (let c = 0; c < N; c++) {
+            const v = board[r * N + c];
+            if (v === EMPTY) continue;
+            const pt = coordToPx(r, c);
+            drawStone(pt.x, pt.y, stoneRadius, v, 1);
+          }
+        }
+
+        // 7. Highlight Marker on Last Placed Stone
+        if (moveHistory.length > 0) {
+          const last = moveHistory[moveHistory.length - 1];
+          const lp = coordToPx(last.r, last.c);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(lp.x, lp.y, Math.max(3.2, stoneRadius * 0.26), 0, Math.PI * 2);
+          ctx.fillStyle = last.color === BLACK ? '#5ce1e6' : '#f43f5e';
+          ctx.shadowColor = last.color === BLACK ? '#5ce1e6' : '#f43f5e';
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 8. Glowing Winning-5-Line Beam Animation
+        if (winLine && winLine.length >= 5) {
+          const pA = coordToPx(winLine[0].r, winLine[0].c);
+          const pB = coordToPx(winLine[winLine.length - 1].r, winLine[winLine.length - 1].c);
+          const prog = Math.min(1, winBeamProgress);
+          const curX = pA.x + (pB.x - pA.x) * prog;
+          const curY = pA.y + (pB.y - pA.y) * prog;
+          const pulse = 0.72 + 0.28 * Math.sin((timestamp || 0) * 0.006);
+
+          ctx.save();
+          // Pulsing halos on winning stones
+          for (let i = 0; i < winLine.length; i++) {
+            const wp = coordToPx(winLine[i].r, winLine[i].c);
+            ctx.beginPath();
+            ctx.arc(wp.x, wp.y, stoneRadius + 3.2, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(251, 191, 36, ' + (0.65 * pulse).toFixed(2) + ')';
+            ctx.lineWidth = 2.6;
+            ctx.shadowColor = '#fbbf24';
+            ctx.shadowBlur = 14;
+            ctx.stroke();
+          }
+
+          // Outer golden beam glow
+          ctx.beginPath();
+          ctx.moveTo(pA.x, pA.y);
+          ctx.lineTo(curX, curY);
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.88)';
+          ctx.lineWidth = 6;
+          ctx.lineCap = 'round';
+          ctx.shadowColor = '#f59e0b';
+          ctx.shadowBlur = 20;
+          ctx.stroke();
+
+          // Inner bright core
+          ctx.beginPath();
+          ctx.moveTo(pA.x, pA.y);
+          ctx.lineTo(curX, curY);
+          ctx.strokeStyle = '#fffbeb';
+          ctx.lineWidth = 2.4;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function startWinBeamAnimation() {
+        stopWinBeamAnimation();
+        winBeamProgress = 0;
+        let startTs = null;
+        function frame(ts) {
+          if (!startTs) startTs = ts;
+          const elapsed = ts - startTs;
+          winBeamProgress = Math.min(1, elapsed / 360);
+          renderBoard(ts);
+          if (winLine) {
+            animRafId = requestAnimationFrame(frame);
+          }
+        }
+        animRafId = requestAnimationFrame(frame);
+      }
+
+      function stopWinBeamAnimation() {
+        if (animRafId) {
+          cancelAnimationFrame(animRafId);
+          animRafId = null;
+        }
+      }
+
+      // ============================================================
+      // Gameplay Flow
+      // ============================================================
+      function finishGame(winnerColor) {
+        gameOver = true;
+        aiThinking = false;
+
+        if (winnerColor === EMPTY) {
+          stats.draws++;
+          saveStats(stats);
+          syncHUD();
+          ArcadeSFX.play('clear');
+          setTimeout(function () {
+            if (!gameOver) return;
+            endBadge.textContent = '🤝 DRAW GAME';
+            endTitle.textContent = '势均力敌 · 握手言和';
+            endDesc.textContent = '225 处交叉点全部落满，双方未分胜负！';
+            endOverlay.classList.remove('hidden');
+          }, 340);
+          return;
+        }
+
+        startWinBeamAnimation();
+
+        let playerWon = true;
+        if (gameMode !== 'pvp') {
+          playerWon = winnerColor === humanColor();
+          if (playerWon) stats.wins++;
+          else stats.losses++;
+          saveStats(stats);
+        }
+
+        syncHUD();
+        if (playerWon) {
+          ArcadeSFX.play('win');
+        } else {
+          ArcadeSFX.play('lose');
+        }
+
+        const tokenAtEnd = sessionToken;
+        setTimeout(function () {
+          if (!gameOver || sessionToken !== tokenAtEnd) return;
+          if (gameMode === 'pvp') {
+            endBadge.textContent = '✨ FIVE IN A ROW';
+            endTitle.textContent = winnerColor === BLACK ? '⚫ 黑方五子连珠获胜！' : '⚪ 白方五子连珠获胜！';
+            endDesc.textContent = '共计 ' + moveHistory.length + ' 手棋分出胜负，点击“复盘查看”可细看棋局或悔棋。';
+          } else if (playerWon) {
+            endBadge.textContent = '🏆 VICTORY';
+            endBadge.style.color = 'var(--emerald)';
+            endTitle.textContent = '妙手连珠 · 你击败了 AI！';
+            endDesc.textContent = '仅用 ' + moveHistory.length + ' 手棋锁定胜局！要不要挑战更高难度？';
+          } else {
+            endBadge.textContent = '🤖 AI WINS';
+            endBadge.style.color = 'var(--rose)';
+            endTitle.textContent = 'AI 抢先连成五子！';
+            endDesc.textContent = '你可以点击“复盘查看”研究关键杀招，也可以悔棋重下这一步！';
+          }
+          endOverlay.classList.remove('hidden');
+        }, 560);
+      }
+
+      function placeStone(r, c) {
+        if (gameOver) return false;
+        if (board[r * N + c] !== EMPTY) return false;
+
+        const color = currentTurn;
+        board[r * N + c] = color;
+        moveHistory.push({ r: r, c: c, color: color });
+        playStoneSFX(color);
+
+        const foundWin = findWinningLine(r, c, color);
+        if (foundWin) {
+          winLine = foundWin;
+          finishGame(color);
+          return true;
+        }
+
+        if (moveHistory.length >= N * N) {
+          finishGame(EMPTY);
+          renderBoard();
+          return true;
+        }
+
+        currentTurn = color === BLACK ? WHITE : BLACK;
+        syncHUD();
+        renderBoard();
+
+        if (!isHumanTurn()) {
+          scheduleAIMove();
+        }
+        return true;
+      }
+
+      function scheduleAIMove() {
+        aiThinking = true;
+        syncHUD();
+        renderBoard();
+        const myToken = sessionToken;
+
+        setTimeout(function () {
+          if (myToken !== sessionToken || gameOver) return;
+          const move = chooseAIMove();
+          aiThinking = false;
+          if (move && board[move.r * N + move.c] === EMPTY) {
+            placeStone(move.r, move.c);
+          }
+        }, 160);
+      }
+
+      function resetGame() {
+        sessionToken++;
+        stopWinBeamAnimation();
+        board.fill(EMPTY);
+        moveHistory = [];
+        currentTurn = BLACK;
+        gameOver = false;
+        winLine = null;
+        winBeamProgress = 0;
+        aiThinking = false;
+        endOverlay.classList.add('hidden');
+        endBadge.style.color = 'var(--cyan)';
+
+        syncHUD();
+        renderBoard();
+
+        if (gameMode === 'pve-white') {
+          scheduleAIMove();
+        }
+      }
+
+      function undoMove() {
+        if (aiThinking || moveHistory.length === 0) return;
+        sessionToken++;
+        stopWinBeamAnimation();
+        endOverlay.classList.add('hidden');
+        gameOver = false;
+        winLine = null;
+
+        if (gameMode === 'pvp') {
+          const last = moveHistory.pop();
+          board[last.r * N + last.c] = EMPTY;
+          currentTurn = last.color;
+        } else {
+          const hColor = humanColor();
+          // Pop until we undo Human's last stone (so it becomes Human's turn again)
+          if (moveHistory[moveHistory.length - 1].color !== hColor && moveHistory.length >= 2) {
+            const aiLast = moveHistory.pop();
+            board[aiLast.r * N + aiLast.c] = EMPTY;
+            const huLast = moveHistory.pop();
+            board[huLast.r * N + huLast.c] = EMPTY;
+          } else if (moveHistory[moveHistory.length - 1].color === hColor) {
+            const huLast = moveHistory.pop();
+            board[huLast.r * N + huLast.c] = EMPTY;
+          }
+          currentTurn = hColor;
+        }
+
+        ArcadeSFX.play('click');
+        syncHUD();
+        renderBoard();
+      }
+
+      // ============================================================
+      // Input & Control Event Wiring
+      // ============================================================
+      canvas.addEventListener('pointermove', function (e) {
+        if (e.pointerType === 'touch') return;
+        const pt = pxToCoord(e.clientX, e.clientY);
+        const changed = (!pt && hoverCell) || (pt && !hoverCell) ||
+          (pt && hoverCell && (pt.r !== hoverCell.r || pt.c !== hoverCell.c));
+        hoverCell = pt;
+        if (changed && !winLine) renderBoard();
+      });
+
+      canvas.addEventListener('pointerleave', function () {
+        if (hoverCell) {
+          hoverCell = null;
+          if (!winLine) renderBoard();
+        }
+      });
+
+      canvas.addEventListener('click', function (e) {
+        if (gameOver || aiThinking || !isHumanTurn()) return;
+        const pt = pxToCoord(e.clientX, e.clientY);
+        if (!pt) return;
+        hoverCell = null;
+        placeStone(pt.r, pt.c);
+      });
+
+      modeGroup.addEventListener('click', function (e) {
+        const btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        const m = btn.dataset.mode;
+        if (!m || m === gameMode) return;
+        gameMode = m;
+        document.querySelectorAll('#modeGroup .seg-btn').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.mode === m);
+        });
+        ArcadeSFX.play('click');
+        resetGame();
+      });
+
+      aiDiffGroup.addEventListener('click', function (e) {
+        const btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        const d = btn.dataset.ai;
+        if (!d || d === aiDifficulty) return;
+        aiDifficulty = d;
+        document.querySelectorAll('#aiDiffGroup .seg-btn').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.ai === d);
+        });
+        ArcadeSFX.play('click');
+      });
+
+      boardThemeGroup.addEventListener('click', function (e) {
+        const btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        const t = btn.dataset.btheme;
+        if (!t || t === boardTheme) return;
+        boardTheme = t;
+        document.querySelectorAll('#boardThemeGroup .seg-btn').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.btheme === t);
+        });
+        ArcadeSFX.play('click');
+        if (!winLine) renderBoard();
+      });
+
+      undoBtn.addEventListener('click', undoMove);
+
+      restartBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        resetGame();
+      });
+
+      againBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        resetGame();
+      });
+
+      reviewBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        endOverlay.classList.add('hidden');
+      });
+
+      window.addEventListener('keydown', function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        if (e.key === 'z' || e.key === 'Z') {
+          e.preventDefault();
+          undoMove();
+        } else if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          ArcadeSFX.play('click');
+          resetGame();
+        }
+      });
+
+      if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(function () {
+          resizeCanvas();
+        });
+        ro.observe(canvasHolder);
+      } else {
+        window.addEventListener('resize', resizeCanvas);
+      }
+
+      resizeCanvas();
+      resetGame();
+    })();
+  </script>
+</body>
+</html>

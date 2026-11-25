@@ -29,6 +29,7 @@
           <button id="btnContinue" class="btn">Continue</button>
         </div>
         <button id="btnCustomize" class="btn" style="width:100%;margin-top:12px">⚙ Customize values</button>
+        <a href="../index.html" class="btn" style="width:100%;margin-top:10px;display:block;text-align:center;text-decoration:none">← 返回游戏大厅</a>
         <p id="menuHint" class="menu-hint"></p>
       </div>
       <div class="menu-credit">Canvas · ES6 · No frameworks</div>
@@ -70,6 +71,7 @@
           <button id="btnFull" class="btn btn-small" title="Fullscreen">⛶</button>
           <button id="btnRestart" class="btn btn-small" title="Restart this phase">⟲</button>
           <button id="btnMenu" class="btn btn-small" title="Menu">☰</button>
+          <a href="../index.html" class="btn btn-small" style="text-decoration:none" title="返回游戏大厅">🏠</a>
         </div>
       </header>
 
@@ -130,5 +132,13 @@
   <script src="js/ui.js"></script>
   <script src="js/save.js"></script>
   <script src="js/game.js"></script>
+  <script>
+    try {
+      var k = 'pixel_arcade_recent_v2';
+      var l = JSON.parse(localStorage.getItem(k) || '[]').filter(function(x){ return x !== '塔防战争/index.html'; });
+      l.unshift('塔防战争/index.html');
+      localStorage.setItem(k, JSON.stringify(l.slice(0, 8)));
+    } catch (e) {}
+  </script>
 </body>
 </html>

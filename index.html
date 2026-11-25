@@ -1,2 +1,1454 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>像素游乐场 · HTML 游戏大厅</title><style>*{box-sizing:border-box}body{margin:0;background:#07111f;color:#e9f2ff;font:16px system-ui,-apple-system,"Microsoft YaHei",sans-serif}a{color:inherit;text-decoration:none}.wrap{max-width:1100px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.brand{font-size:22px;font-weight:800}.back{padding:9px 14px;border:1px solid #304968;border-radius:10px;background:#0e2036}.panel{background:#0d1d31;border:1px solid #24405f;border-radius:18px;padding:20px;box-shadow:0 16px 45px #0004}button{font:inherit;color:inherit;background:#163452;border:1px solid #38618a;border-radius:9px;padding:9px 14px;cursor:pointer}button:hover{background:#214a70}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.muted{color:#94acc7}.score{font-size:18px;color:#7de2ff}canvas{display:block;max-width:100%;margin:auto;background:#06101c;border-radius:12px;border:1px solid #284665}input{background:#071524;color:white;border:1px solid #315275;padding:8px;border-radius:8px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.card{padding:18px;border-radius:16px;background:linear-gradient(145deg,#122944,#0b1b2f);border:1px solid #2b4c6d;transition:.2s}.card:hover{transform:translateY(-3px);border-color:#6bdcff}.emoji{font-size:38px}.card h3{margin:8px 0}.hero{padding:32px 0}.hero h1{font-size:clamp(36px,7vw,72px);margin:4px 0;background:linear-gradient(90deg,#7de2ff,#b8a1ff);color:transparent;background-clip:text}.tag{display:inline-block;color:#7de2ff;background:#123653;padding:5px 10px;border-radius:999px;font-size:13px}.tips{line-height:1.7;color:#a9bfd6}.memory{display:grid;grid-template-columns:repeat(4,72px);gap:10px;justify-content:center}.memory button{height:72px;font-size:30px;padding:0;background:#163452}.mine{display:grid;grid-template-columns:repeat(9,34px);gap:3px;justify-content:center}.mine button{width:34px;height:34px;padding:0;font-size:14px}.tiles{display:grid;grid-template-columns:repeat(4,72px);gap:8px;justify-content:center}.tile{height:72px;display:grid;place-items:center;border-radius:8px;background:#18324e;font-size:25px;font-weight:bold}.t2{background:#315578}.t4{background:#36758d}.t8{background:#bc744a}.t16{background:#bf4b52}.t32{background:#9853a9}.t64{background:#e7a13b}.t128{background:#d5c15a;color:#142033}.t256,.t512,.t1024,.t2048{background:#65d0aa;color:#102431}footer{padding:28px 0;color:#7089a5;text-align:center}@media(max-width:600px){.wrap{padding:16px}.memory{grid-template-columns:repeat(4,64px)}.memory button{height:64px}.tiles{grid-template-columns:repeat(4,64px)}.tile{height:64px}.mine{grid-template-columns:repeat(9,30px)}.mine button{width:30px;height:30px}}
-</style></head><body><main class="wrap"><header class="top"><div class="brand">🎮 像素游乐场</div><span class="muted">离线可玩 · 无需安装</span></header><section class="hero"><span class="tag">HTML5 GAME ARCADE</span><h1>今天玩点什么？</h1><p class="muted">一键进入游戏，键盘和手机触屏都支持。把整个文件夹上传到任何静态服务器即可运行。</p></section><section class="grid"><a class="card" href="射击.html"><div class="emoji">🎯</div><h3>几猫 · 港区突击</h3><p class="muted">沉浸式第一人称射击体验</p><span class="tag">3D · 热门</span></a><a class="card" href="横版平台冒险/index.html"><div class="emoji">🌱</div><h3>Sprout Runner 横版冒险</h3><p class="muted">GitHub 开源平台跳跃游戏</p><span class="tag">平台 · 大型</span></a><a class="card" href="塔防战争/index.html"><div class="emoji">🛡️</div><h3>Tower Defense 塔防战争</h3><p class="muted">多塔升级、波次防守和经济系统</p><span class="tag">策略 · 大型</span></a><a class="card" href="贪吃蛇.html"><div class="emoji">🐍</div><h3>贪吃蛇</h3><p class="muted">吃掉果实，挑战最长纪录</p><span class="tag">街机</span></a><a class="card" href="2048.html"><div class="emoji">🔢</div><h3>2048</h3><p class="muted">滑动合并数字方块</p><span class="tag">益智</span></a><a class="card" href="俄罗斯方块.html"><div class="emoji">🧱</div><h3>俄罗斯方块</h3><p class="muted">消除整行，速度越来越快</p><span class="tag">经典</span></a><a class="card" href="打砖块.html"><div class="emoji">🏓</div><h3>打砖块</h3><p class="muted">反弹小球，清空所有砖块</p><span class="tag">街机</span></a><a class="card" href="记忆翻牌.html"><div class="emoji">🧠</div><h3>记忆翻牌</h3><p class="muted">找出所有相同的图案</p><span class="tag">休闲</span></a><a class="card" href="扫雷.html"><div class="emoji">💣</div><h3>扫雷</h3><p class="muted">逻辑推理，避开隐藏地雷</p><span class="tag">益智</span></a><a class="card" href="霓虹跑酷.html"><div class="emoji">🏃</div><h3>霓虹跑酷</h3><p class="muted">躲避障碍，跑得越远越好</p><span class="tag">动作 · 大型</span></a><a class="card" href="太空守卫.html"><div class="emoji">🚀</div><h3>太空守卫</h3><p class="muted">驾驶飞船迎战无尽敌群</p><span class="tag">射击 · 大型</span></a></section><footer>共 7 款游戏 · 纯前端制作 · 支持手机浏览器</footer></main></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>像素游乐场 · HTML5 精品网页游戏大厅</title>
+  <meta name="description" content="收录 22 款精选 GitHub 开源神作与自研精制街机益智游戏，纯静态部署，即点即玩。">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050913;
+      --bg-elev: #0b1324;
+      --card: rgba(14, 24, 44, 0.78);
+      --card-hover: rgba(19, 33, 60, 0.94);
+      --line: rgba(125, 180, 255, 0.16);
+      --line-bright: rgba(94, 234, 212, 0.55);
+      --text: #eef5ff;
+      --muted: #8fa6c4;
+      --faint: #59708f;
+      --cyan: #5eead4;
+      --sky: #38bdf8;
+      --blue: #60a5fa;
+      --violet: #a78bfa;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+      --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, ui-monospace, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(1000px 540px at 10% -5%, rgba(56, 189, 248, 0.15), transparent 60%),
+        radial-gradient(900px 520px at 90% 2%, rgba(167, 139, 250, 0.14), transparent 60%),
+        radial-gradient(700px 500px at 50% 100%, rgba(45, 212, 191, 0.08), transparent 65%);
+      color: var(--text);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Subtle architectural grid overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(ellipse at 50% 20%, #000 35%, transparent 85%);
+      -webkit-mask-image: radial-gradient(ellipse at 50% 20%, #000 35%, transparent 85%);
+      z-index: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+
+    /* Sticky Glass Header */
+    .topbar-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background: rgba(5, 9, 19, 0.78);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 21px;
+      background: linear-gradient(135deg, rgba(94, 234, 212, 0.2), rgba(96, 165, 250, 0.25));
+      border: 1px solid rgba(94, 234, 212, 0.45);
+      box-shadow: 0 0 24px rgba(94, 234, 212, 0.18);
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-text span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      justify-content: flex-end;
+      min-width: 260px;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 0 1 320px;
+      width: 100%;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 52px 10px 36px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(14, 25, 46, 0.82);
+      color: var(--text);
+      font: 500 14px/1.2 var(--font);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-box input::placeholder { color: var(--faint); }
+
+    .search-box input:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--faint);
+      pointer-events: none;
+    }
+
+    .search-Shortcut {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 2px 6px;
+      font: 600 11px/1.2 var(--mono);
+      color: var(--faint);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    .random-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(94, 234, 212, 0.45);
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.85), rgba(37, 99, 235, 0.85));
+      color: #fff;
+      font: 700 13px/1 var(--font);
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(13, 148, 136, 0.28);
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .random-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(56, 189, 248, 0.38);
+    }
+
+    /* Hero Bento Showcase */
+    .hero-bento {
+      margin: 26px 0 28px;
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 18px;
+    }
+
+    .spotlight-main {
+      position: relative;
+      border-radius: 24px;
+      padding: 32px;
+      overflow: hidden;
+      border: 1px solid rgba(125, 211, 252, 0.26);
+      background: linear-gradient(135deg, #0d1d3a 0%, #091326 60%, #13112e 100%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.48);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 280px;
+    }
+
+    .spotlight-glow {
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--spot-accent, rgba(56,189,248,0.28)), transparent 70%);
+      pointer-events: none;
+      transition: background 0.4s ease;
+    }
+
+    .spotlight-art {
+      position: absolute;
+      right: 26px;
+      bottom: 20px;
+      font-size: 112px;
+      line-height: 1;
+      opacity: 0.22;
+      filter: drop-shadow(0 12px 28px rgba(0,0,0,0.5));
+      pointer-events: none;
+      user-select: none;
+      transition: transform 0.35s ease;
+    }
+
+    .spotlight-main:hover .spotlight-art {
+      transform: scale(1.06) rotate(-3deg);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      background: rgba(94, 234, 212, 0.14);
+      color: var(--cyan);
+      border: 1px solid rgba(94, 234, 212, 0.34);
+    }
+
+    .spotlight-body {
+      position: relative;
+      z-index: 2;
+      max-width: 520px;
+      margin: 16px 0 22px;
+    }
+
+    .spotlight-body h1 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 3.6vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    .spotlight-body p {
+      margin: 0;
+      color: #b4c7e0;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .spotlight-footer {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .play-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: 13px;
+      background: #eef5ff;
+      color: #060d1b;
+      font: 800 14px/1 var(--font);
+      box-shadow: 0 10px 28px rgba(238, 245, 255, 0.22);
+      transition: transform 0.16s ease, background 0.16s ease;
+    }
+
+    .play-cta:hover {
+      background: #5eead4;
+      transform: translateY(-2px);
+    }
+
+    .spot-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .spot-dot {
+      padding: 6px 11px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(8, 15, 30, 0.65);
+      color: var(--muted);
+      font: 600 12px/1 var(--font);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .spot-dot.active, .spot-dot:hover {
+      color: #fff;
+      border-color: var(--cyan);
+      background: rgba(94, 234, 212, 0.18);
+    }
+
+    .hero-side {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .side-panel {
+      border-radius: 20px;
+      padding: 20px 22px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .metric {
+      padding: 10px;
+      border-radius: 13px;
+      background: rgba(6, 11, 23, 0.62);
+      border: 1px solid rgba(125, 180, 255, 0.12);
+      text-align: center;
+    }
+
+    .metric b {
+      display: block;
+      font: 800 22px/1.1 var(--mono);
+      color: var(--cyan);
+    }
+
+    .metric span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .mini-picks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .mini-pick {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(6, 11, 23, 0.62);
+      border: 1px solid rgba(125, 180, 255, 0.14);
+      transition: border-color 0.18s ease, transform 0.18s ease;
+    }
+
+    .mini-pick:hover {
+      border-color: var(--line-bright);
+      transform: translateY(-2px);
+    }
+
+    .mini-pick i {
+      font-style: normal;
+      font-size: 22px;
+    }
+
+    .mini-pick div b {
+      display: block;
+      font-size: 13px;
+    }
+
+    .mini-pick div span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Recently Played Bar */
+    .recent-section {
+      margin-bottom: 22px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: rgba(12, 22, 41, 0.68);
+      border: 1px solid var(--line);
+      display: none;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .recent-section.visible { display: flex; }
+
+    .recent-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .recent-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .recent-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(24, 41, 72, 0.72);
+      border: 1px solid rgba(125, 180, 255, 0.2);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.16s ease;
+    }
+
+    .recent-chip:hover {
+      border-color: var(--cyan);
+      background: rgba(34, 58, 100, 0.92);
+      transform: translateY(-1px);
+    }
+
+    /* Filter Tabs */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 15px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(13, 23, 43, 0.72);
+      color: var(--muted);
+      font: 600 13px/1 var(--font);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      border-color: rgba(125, 211, 252, 0.35);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(167, 139, 250, 0.22));
+      color: #fff;
+      border-color: var(--cyan);
+      box-shadow: 0 4px 18px rgba(56, 189, 248, 0.18);
+    }
+
+    .tab-count {
+      font: 700 11px/1 var(--mono);
+      padding: 3px 6px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #cfe4ff;
+    }
+
+    .result-info {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Game Cards Grid */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+      gap: 18px;
+    }
+
+    .game-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border-radius: 20px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      transition: transform 0.22s cubic-bezier(.2,.8,.2,1), border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-5px);
+      background: var(--card-hover);
+      border-color: var(--card-accent, var(--line-bright));
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(94, 234, 212, 0.15);
+    }
+
+    .card-cover {
+      position: relative;
+      height: 128px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: var(--cover-bg, linear-gradient(135deg, #13294b, #09152b));
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .card-cover::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      bottom: -34px;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%);
+      pointer-events: none;
+    }
+
+    .cover-top {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .source-pill {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: rgba(6, 11, 22, 0.58);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #e6f1ff;
+    }
+
+    .source-pill.gh {
+      color: #fde68a;
+      border-color: rgba(251, 191, 36, 0.4);
+    }
+
+    .source-pill.hot {
+      color: #fda4af;
+      border-color: rgba(251, 113, 133, 0.45);
+    }
+
+    .fav-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(6, 11, 22, 0.52);
+      color: #94a3b8;
+      font-size: 14px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      z-index: 3;
+    }
+
+    .fav-btn:hover {
+      transform: scale(1.1);
+      color: #fde047;
+      border-color: rgba(250, 204, 21, 0.5);
+    }
+
+    .fav-btn.active {
+      color: #facc15;
+      background: rgba(250, 204, 21, 0.18);
+      border-color: rgba(250, 204, 21, 0.6);
+    }
+
+    .cover-emblem {
+      position: absolute;
+      right: 18px;
+      bottom: 10px;
+      font-size: 56px;
+      line-height: 1;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.42));
+      transition: transform 0.25s cubic-bezier(.2,.8,.2,1);
+      user-select: none;
+      z-index: 1;
+    }
+
+    .game-card:hover .cover-emblem {
+      transform: scale(1.12) rotate(-5deg);
+    }
+
+    .cover-devices {
+      position: relative;
+      z-index: 2;
+      font-size: 12px;
+      color: rgba(238, 245, 255, 0.78);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .card-body {
+      padding: 16px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-body h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-body p {
+      margin: 0 0 14px;
+      font-size: 13.5px;
+      line-height: 1.58;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(125, 180, 255, 0.1);
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-chip {
+      font-size: 11.5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.11);
+      color: #bae6fd;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .launch-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cyan);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      transition: transform 0.16s ease;
+    }
+
+    .game-card:hover .launch-text {
+      transform: translateX(3px);
+    }
+
+    .empty-state {
+      display: none;
+      padding: 56px 20px;
+      text-align: center;
+      border-radius: 20px;
+      border: 1px dashed var(--line);
+      background: rgba(11, 19, 36, 0.5);
+    }
+
+    .empty-state.visible { display: block; }
+    .empty-state h3 { margin: 8px 0 6px; font-size: 19px; }
+    .empty-state p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+
+    footer {
+      margin-top: 52px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--faint);
+      font-size: 13px;
+    }
+
+    @media (max-width: 960px) {
+      .hero-bento { grid-template-columns: 1fr; }
+      .hero-side { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+    }
+
+    @media (max-width: 680px) {
+      .container { padding: 0 14px 44px; }
+      .topbar { padding: 12px 14px; }
+      .top-controls { width: 100%; justify-content: space-between; }
+      .search-box { flex: 1; }
+      .search-Shortcut { display: none; }
+      .hero-side { grid-template-columns: 1fr; }
+      .spotlight-main { padding: 22px; min-height: 240px; }
+      .spotlight-art { font-size: 78px; right: 14px; bottom: 52px; }
+      .games-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar-wrap">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <div class="brand-logo">🎮</div>
+        <div class="brand-text">
+          <strong>像素游乐场</strong>
+          <span>HTML5 Static Game Arcade</span>
+        </div>
+      </a>
+
+      <div class="top-controls">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input id="searchInput" type="search" placeholder="搜索游戏名称、玩法、标签…" autocomplete="off">
+          <span class="search-Shortcut">/</span>
+        </div>
+        <button id="randomBtn" class="random-btn" type="button" title="随机挑一款游戏立即开玩">
+          <span>🎲</span><span>随机开玩</span>
+        </button>
+      </div>
+    </header>
+  </div>
+
+  <main class="container">
+    <!-- Hero Bento Showcase -->
+    <section class="hero-bento" aria-label="精选推荐">
+      <div class="spotlight-main" id="spotlightCard">
+        <div class="spotlight-glow" id="spotGlow"></div>
+        <div class="spotlight-art" id="spotArt">🎯</div>
+        <span class="eyebrow" id="spotEyebrow">🔥 镇馆 3D 战术射击</span>
+        <div class="spotlight-body">
+          <h1 id="spotTitle">几猫 · 港区突击</h1>
+          <p id="spotDesc">全 3D 沉浸式第一人称港区突击行动。在雨夜集装箱码头潜行与交火，切断三处主控中继并突破机械猎犬与飞鸥的围剿撤离。</p>
+        </div>
+        <div class="spotlight-footer">
+          <a class="play-cta" id="spotLink" href="射击.html">▶ 立即出击</a>
+          <div class="spot-dots" id="spotDots"></div>
+        </div>
+      </div>
+
+      <div class="hero-side">
+        <div class="side-panel">
+          <div>
+            <span class="eyebrow" style="background:rgba(167,139,250,0.15);color:#ddd6fe;border-color:rgba(167,139,250,0.35)">⚡ 纯静态游戏矩阵</span>
+            <p style="margin:10px 0 4px;font-size:13.5px;color:var(--muted);line-height:1.5">
+              零后端依赖、无外链追踪阻塞，Nginx 任意目录即放即玩，进度与最高分自动保存在本地浏览器。
+            </p>
+          </div>
+          <div class="metrics-row">
+            <div class="metric"><b id="totalMetric">22</b><span>精品游戏</span></div>
+            <div class="metric"><b>11</b><span>GitHub 名作</span></div>
+            <div class="metric"><b>100%</b><span>离线可用</span></div>
+          </div>
+        </div>
+
+        <div class="side-panel">
+          <span style="font-size:12px;font-weight:700;color:var(--amber);letter-spacing:0.05em">🌟 新晋入驻热榜</span>
+          <div class="mini-picks">
+            <a class="mini-pick" href="未来竞速/index.html">
+              <i>🏎️</i>
+              <div><b>HexGL 未来赛车</b><span>WebGL 3D 竞速</span></div>
+            </a>
+            <a class="mini-pick" href="3D魔方/index.html">
+              <i>🧊</i>
+              <div><b>3D 极简魔方</b><span>2~5阶丝滑还原</span></div>
+            </a>
+            <a class="mini-pick" href="水果合成.html">
+              <i>🍉</i>
+              <div><b>合成大西瓜</b><span>Q弹物理碰撞</span></div>
+            </a>
+            <a class="mini-pick" href="小黑屋/index.html">
+              <i>🔥</i>
+              <div><b>小黑屋 中文版</b><span>神级文字生存</span></div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recently Played -->
+    <section class="recent-section" id="recentSection" aria-label="最近常玩">
+      <span class="recent-label">🕒 最近常玩</span>
+      <div class="recent-chips" id="recentChips"></div>
+    </section>
+
+    <!-- Filter Toolbar -->
+    <section class="toolbar">
+      <div class="filter-tabs" id="filterTabs" role="tablist">
+        <button class="tab-btn active" data-cat="all" type="button">全部游戏 <span class="tab-count" data-count="all">22</span></button>
+        <button class="tab-btn" data-cat="3d" type="button">🔥 3D 与大型大作 <span class="tab-count" data-count="3d">0</span></button>
+        <button class="tab-btn" data-cat="github" type="button">🌟 GitHub 开源精选 <span class="tab-count" data-count="github">0</span></button>
+        <button class="tab-btn" data-cat="arcade" type="button">🕹️ 街机与动作 <span class="tab-count" data-count="arcade">0</span></button>
+        <button class="tab-btn" data-cat="puzzle" type="button">🧩 益智与策略 <span class="tab-count" data-count="puzzle">0</span></button>
+        <button class="tab-btn" data-cat="mobile" type="button">📱 触屏优选 <span class="tab-count" data-count="mobile">0</span></button>
+        <button class="tab-btn" data-cat="fav" type="button">⭐ 我的收藏 <span class="tab-count" data-count="fav">0</span></button>
+      </div>
+      <div class="result-info" id="resultInfo">共展示 22 款游戏</div>
+    </section>
+
+    <!-- Games Grid -->
+    <section class="games-grid" id="gamesGrid" aria-label="游戏列表"></section>
+
+    <div class="empty-state" id="emptyState">
+      <div style="font-size:40px">🛸</div>
+      <h3>没有找到匹配的游戏</h3>
+      <p>试试更换搜索关键词，或切回「全部游戏」浏览完整片单。</p>
+      <button class="random-btn" type="button" onclick="resetFilters()">查看全部游戏</button>
+    </div>
+
+    <footer>
+      <div>🎮 像素游乐场 · HTML5 纯静态精品网页游戏集成仓</div>
+      <div>支持键盘 / 鼠标 / 手机触屏 · 按 <kbd style="padding:2px 6px;border-radius:5px;background:#111d35;border:1px solid #2b446e;font-family:monospace">/</kbd> 快速搜索</div>
+    </footer>
+  </main>
+
+  <script>
+    const GAMES = [
+      {
+        id: '射击.html',
+        href: '射击.html',
+        title: '几猫 · 港区突击',
+        emoji: '🎯',
+        badge: '镇馆 3D 大作',
+        badgeType: 'hot',
+        cats: ['3d', 'arcade', 'mobile'],
+        tags: ['3D FPS', '战术潜行', '雨夜光影'],
+        devices: '⌨️ 🖱️ 📱 🎮',
+        desc: '沉浸式全 3D 第一人称射击大作，雨夜集装箱码头切断三处中继，迎战机械猎犬与飞鸥围攻。',
+        cover: 'linear-gradient(135deg, #2d1b14 0%, #17253b 60%, #0d131f 100%)',
+        accent: '#fb923c'
+      },
+      {
+        id: '未来竞速/index.html',
+        href: '未来竞速/index.html',
+        title: 'HexGL · 未来反重力赛车',
+        emoji: '🏎️',
+        badge: 'GitHub 殿堂开源',
+        badgeType: 'gh',
+        cats: ['3d', 'github', 'arcade', 'mobile'],
+        tags: ['WebGL 3D', '科幻竞速', '极速漂移'],
+        devices: '⌨️ 📱 🎮',
+        desc: '致敬 Wipeout 的全 3D 科幻反重力竞速名作，踩上加速带穿梭未来峡谷与高空都市赛道。',
+        cover: 'linear-gradient(135deg, #0d324d 0%, #1b2845 55%, #091326 100%)',
+        accent: '#38bdf8'
+      },
+      {
+        id: '3D魔方/index.html',
+        href: '3D魔方/index.html',
+        title: 'The Cube · 3D 极简魔方',
+        emoji: '🧊',
+        badge: 'GitHub 高星神作',
+        badgeType: 'gh',
+        cats: ['3d', 'github', 'puzzle', 'mobile'],
+        tags: ['3D 魔方', '2~5阶切换', '竞速计时'],
+        devices: '🖱️ 📱',
+        desc: '丝滑到极致的 WebGL 3D 魔方！支持二阶至五阶自由切换、多款高级配色主题与专业竞速成绩统计。',
+        cover: 'linear-gradient(135deg, #1e293b 0%, #312e81 60%, #0f172a 100%)',
+        accent: '#818cf8'
+      },
+      {
+        id: '塔防战争/index.html',
+        href: '塔防战争/index.html',
+        title: 'Tower Defense · 战线塔防',
+        emoji: '🛡️',
+        badge: 'GitHub 策略精选',
+        badgeType: 'gh',
+        cats: ['3d', 'github', 'puzzle', 'mobile'],
+        tags: ['多塔升级', '5倍速波次', 'Boss 防守'],
+        devices: '🖱️ ⌨️ 📱',
+        desc: '深度策略塔防大作，四大难度、丰富炮塔分支升级、经济利息运营与空地一体军团防守。',
+        cover: 'linear-gradient(135deg, #13332a 0%, #10253f 65%, #091322 100%)',
+        accent: '#34d399'
+      },
+      {
+        id: '横版平台冒险/index.html',
+        href: '横版平台冒险/index.html',
+        title: 'Sprout Runner · 萌芽历险记',
+        emoji: '🌱',
+        badge: 'GitHub 开源平台',
+        badgeType: 'gh',
+        cats: ['3d', 'github', 'arcade', 'mobile'],
+        tags: ['横版跳跃', '像素冒险', 'Boss 关卡'],
+        devices: '⌨️ 📱',
+        desc: '精致复古像素风横版平台冒险游戏，收集金币与成长道具，踩扁怪物一路闯关！',
+        cover: 'linear-gradient(135deg, #163e31 0%, #1d3557 65%, #0b1629 100%)',
+        accent: '#4ade80'
+      },
+      {
+        id: '小黑屋/index.html',
+        href: '小黑屋/index.html',
+        title: 'A Dark Room · 小黑屋',
+        emoji: '🔥',
+        badge: 'GitHub 传奇神作',
+        badgeType: 'gh',
+        cats: ['3d', 'github', 'puzzle', 'mobile'],
+        tags: ['官方简中', '文字生存', '废土探索'],
+        devices: '🖱️ ⌨️ 📱',
+        desc: '从添柴生火开始，逐步建立村落、制作武器并踏入广阔废土世界探索的极简文字冒险经典。',
+        cover: 'linear-gradient(135deg, #27272a 0%, #18181b 60%, #09090b 100%)',
+        accent: '#f59e0b'
+      },
+      {
+        id: '星际突围/index.html',
+        href: '星际突围/index.html',
+        title: 'Radius Raid · 星际突围',
+        emoji: '🪐',
+        badge: 'GitHub 弹幕冠军',
+        badgeType: 'gh',
+        cats: ['github', 'arcade'],
+        tags: ['双摇杆射击', '粒子爆炸', '属性升级'],
+        devices: '⌨️ 🖱️',
+        desc: 'JS13k 殿堂级太空全方位弹幕射击游戏，华丽几何粒子特效、多种强力敌机与火力成长系统。',
+        cover: 'linear-gradient(135deg, #311042 0%, #141e3c 65%, #080d1a 100%)',
+        accent: '#e879f9'
+      },
+      {
+        id: '3D迷宫/index.html',
+        href: '3D迷宫/index.html',
+        title: 'Astray · 3D 滚球迷宫',
+        emoji: '🔮',
+        badge: 'GitHub WebGL',
+        badgeType: 'gh',
+        cats: ['3d', 'github', 'puzzle', 'mobile'],
+        tags: ['3D 物理', '动态点光源', '随机迷宫'],
+        devices: '⌨️ 📱',
+        desc: '基于 Three.js 与 Box2D 物理引擎打造的沉浸式暗夜光影 3D 滚球迷宫，层层深入挑战方向感。',
+        cover: 'linear-gradient(135deg, #3b1d2e 0%, #1b243b 65%, #090e1a 100%)',
+        accent: '#fbbf24'
+      },
+      {
+        id: '六边形消消乐/index.html',
+        href: '六边形消消乐/index.html',
+        title: 'Hextris · 六边形俄罗斯',
+        emoji: '⬢',
+        badge: 'GitHub 超高星',
+        badgeType: 'gh',
+        cats: ['github', 'puzzle', 'arcade', 'mobile'],
+        tags: ['旋转六边形', '三消连击', '快节奏'],
+        devices: '⌨️ 📱',
+        desc: '风靡全球的旋转六边形下落消除游戏！左右旋转中心六边形，将同色色块相连即可触发连锁消除。',
+        cover: 'linear-gradient(135deg, #0f3443 0%, #1e2a4a 65%, #0a1224 100%)',
+        accent: '#2dd4bf'
+      },
+      {
+        id: '摩天大楼/index.html',
+        href: '摩天大楼/index.html',
+        title: 'Tower Blocks · 摩天盖楼',
+        emoji: '🏗️',
+        badge: 'GitHub 休闲爆款',
+        badgeType: 'gh',
+        cats: ['github', 'arcade', 'mobile'],
+        tags: ['抓钩堆叠', '完美落点', '治愈插画'],
+        devices: '🖱️ ⌨️ 📱',
+        desc: '考验眼疾手快的抓钩盖楼休闲佳作，对准摇摆的重心层层向上堆叠，建造直入云霄的摩天大楼！',
+        cover: 'linear-gradient(135deg, #4a1d24 0%, #2b1f3a 65%, #0f1324 100%)',
+        accent: '#fb7185'
+      },
+      {
+        id: '吃豆人/index.html',
+        href: '吃豆人/index.html',
+        title: 'PAC-MAN · 经典吃豆人',
+        emoji: '🍒',
+        badge: 'GitHub 街机复刻',
+        badgeType: 'gh',
+        cats: ['github', 'arcade', 'mobile'],
+        tags: ['30周年原版', '双人同屏', '复古音效'],
+        devices: '⌨️ 📱',
+        desc: '原汁原味的吃豆人 30 周年纪念街机复刻！支持单人闯关，也可再投一币召唤 Ms. PAC-MAN 双人合作。',
+        cover: 'linear-gradient(135deg, #3b2f0b 0%, #172554 65%, #080f24 100%)',
+        accent: '#facc15'
+      },
+      {
+        id: '恐龙快跑/index.html',
+        href: '恐龙快跑/index.html',
+        title: 'T-Rex · 谷歌绝地小恐龙',
+        emoji: '🦖',
+        badge: 'GitHub 经典移植',
+        badgeType: 'gh',
+        cats: ['github', 'arcade', 'mobile'],
+        tags: ['昼夜交替', '翼龙躲避', '原版音效'],
+        devices: '⌨️ 📱',
+        desc: 'Chrome 经典彩蛋跑酷完整独立版，跨越仙人掌丛林、俯身躲避高空翼龙，体验昼夜交替极速冲刺。',
+        cover: 'linear-gradient(135deg, #1f2937 0%, #1e3a5f 65%, #0b1324 100%)',
+        accent: '#93c5fd'
+      },
+      {
+        id: '水果合成.html',
+        href: '水果合成.html',
+        title: '缤纷合成大西瓜',
+        emoji: '🍉',
+        badge: '全新物理精制',
+        badgeType: 'hot',
+        cats: ['puzzle', 'mobile'],
+        tags: ['2D物理碰撞', '11阶进化', '解压治愈'],
+        devices: '🖱️ 📱',
+        desc: 'Q弹真实的圆形刚体物理碰撞合成游戏！从晶莹葡萄一路碰撞进化，合出霸屏终极大西瓜。',
+        cover: 'linear-gradient(135deg, #3b1229 0%, #15382e 65%, #091522 100%)',
+        accent: '#f43f5e'
+      },
+      {
+        id: '五子棋.html',
+        href: '五子棋.html',
+        title: '国风极夜五子棋 · AI 对弈',
+        emoji: '⚫',
+        badge: '全新智能 AI',
+        badgeType: 'hot',
+        cats: ['puzzle', 'mobile'],
+        tags: ['三档智能AI', '双人同屏', '双主题棋盘'],
+        devices: '🖱️ 📱',
+        desc: '支持休闲/进阶/大师三档棋型评估 AI 与双人同屏博弈，可切换温润榧木与极夜黑金棋盘，支持悔棋。',
+        cover: 'linear-gradient(135deg, #2e2316 0%, #162238 65%, #080f1d 100%)',
+        accent: '#fcd34d'
+      },
+      {
+        id: '俄罗斯方块.html',
+        href: '俄罗斯方块.html',
+        title: '俄罗斯方块 · 极光版',
+        emoji: '🧱',
+        badge: '全面重制升级',
+        badgeType: '',
+        cats: ['arcade', 'puzzle', 'mobile'],
+        tags: ['7-Bag标准', '幽灵落点', 'Hold暂存'],
+        devices: '⌨️ 📱',
+        desc: '专业级 7-Bag 随机序列俄罗斯方块，支持幽灵阴影落点、方块暂存、三连预览、硬降光束与华丽消行粒子。',
+        cover: 'linear-gradient(135deg, #172554 0%, #2e1065 65%, #090d1f 100%)',
+        accent: '#a78bfa'
+      },
+      {
+        id: '2048.html',
+        href: '2048.html',
+        title: '2048 · 幻彩丝滑版',
+        emoji: '🔢',
+        badge: '全面重制升级',
+        badgeType: '',
+        cats: ['puzzle', 'mobile'],
+        tags: ['真实滑动动画', '4×4 / 5×5', '多步撤销'],
+        devices: '⌨️ 🖱️ 📱',
+        desc: '具备真实格子位移过渡与合并回弹动画的精致 2048，支持 4×4 与 5×5 棋盘、极夜/暖阳双皮肤及五步悔棋。',
+        cover: 'linear-gradient(135deg, #3b2314 0%, #1e294b 65%, #091224 100%)',
+        accent: '#fbbf24'
+      },
+      {
+        id: '贪吃蛇.html',
+        href: '贪吃蛇.html',
+        title: '霓虹贪吃蛇 Pro',
+        emoji: '🐍',
+        badge: '全面重制升级',
+        badgeType: '',
+        cats: ['arcade', 'mobile'],
+        tags: ['60帧丝滑插值', '三大模式', '特殊果实'],
+        devices: '⌨️ 📱',
+        desc: '告别生硬跳格！60fps 平滑游动流光蛇身，含经典围墙、无界穿墙与迷宫障碍三种模式及星辰加速道具。',
+        cover: 'linear-gradient(135deg, #063b2d 0%, #112645 65%, #071120 100%)',
+        accent: '#34d399'
+      },
+      {
+        id: '打砖块.html',
+        href: '打砖块.html',
+        title: '棱镜打砖块 · Prism',
+        emoji: '🏓',
+        badge: '全面重制升级',
+        badgeType: '',
+        cats: ['arcade', 'mobile'],
+        tags: ['五大关卡', '多球分裂', '激光火球'],
+        devices: '🖱️ ⌨️ 📱',
+        desc: '五座精心设计的霓虹几何堡垒关卡，掉落三球分裂、烈焰穿透球、双管等离子激光与加长挡板等丰富胶囊！',
+        cover: 'linear-gradient(135deg, #0f3347 0%, #2a1847 65%, #08101f 100%)',
+        accent: '#38bdf8'
+      },
+      {
+        id: '太空守卫.html',
+        href: '太空守卫.html',
+        title: '银河先锋 · 太空守卫',
+        emoji: '🚀',
+        badge: '全面重制升级',
+        badgeType: '',
+        cats: ['arcade', 'mobile'],
+        tags: ['五阶火力', '无畏舰Boss', '超新星清屏'],
+        devices: '⌨️ 🖱️ 📱',
+        desc: '驾驶星际战机迎战五大兵种与巨型无畏舰 Boss，拾取散射升级、僚机护航、能量护盾与全屏超新星炸弹！',
+        cover: 'linear-gradient(135deg, #0d1b3e 0%, #2b123f 65%, #050914 100%)',
+        accent: '#60a5fa'
+      },
+      {
+        id: '霓虹跑酷.html',
+        href: '霓虹跑酷.html',
+        title: '赛博跑酷 2077',
+        emoji: '🏃',
+        badge: '全面重制升级',
+        badgeType: '',
+        cats: ['arcade', 'mobile'],
+        tags: ['二段跳+滑铲', '无敌冲刺', '赛博视差'],
+        devices: '⌨️ 📱',
+        desc: '穿梭多层霓虹都市天际线，施展二段跳、极速滑铲与残影无敌冲刺，收集能量币与磁铁护盾突破极限距离！',
+        cover: 'linear-gradient(135deg, #3b0d36 0%, #102544 65%, #070e1c 100%)',
+        accent: '#f472b6'
+      },
+      {
+        id: '扫雷.html',
+        href: '极客扫雷 Pro',
+        href: '扫雷.html',
+        title: '极客扫雷 Pro',
+        emoji: '💣',
+        badge: '全面重制升级',
+        badgeType: '',
+        cats: ['puzzle', 'mobile'],
+        tags: ['首击必安全', '三档难度', '数字快开'],
+        devices: '🖱️ 📱',
+        desc: '支持初级 9×9、中级 16×16 与大师 16×30 雷区！首击必定展开安全区，支持数字和弦快开与触屏插旗切换。',
+        cover: 'linear-gradient(135deg, #1e293b 0%, #0f293a 65%, #07101d 100%)',
+        accent: '#5eead4'
+      },
+      {
+        id: '记忆翻牌.html',
+        href: '记忆翻牌.html',
+        title: '星辰记忆翻牌',
+        emoji: '🧠',
+        badge: '全面重制升级',
+        badgeType: '',
+        cats: ['puzzle', 'mobile'],
+        tags: ['3D翻转卡牌', '三大主题', '连击星级'],
+        devices: '🖱️ 📱',
+        desc: '真实 3D 透视翻转牌面，涵盖星际探索、奇幻生灵与赛博秘宝三套主题卡组及三档网格，挑战三星满贯连击！',
+        cover: 'linear-gradient(135deg, #271745 0%, #112a45 65%, #081120 100%)',
+        accent: '#c084fc'
+      }
+    ];
+
+    const SPOTLIGHTS = [
+      {
+        label: '港区突击',
+        eyebrow: '🔥 镇馆 3D 战术射击',
+        title: '几猫 · 港区突击',
+        desc: '全 3D 沉浸式第一人称港区突击行动。在雨夜集装箱码头潜行与交火，切断三处主控中继并突破机械猎犬与飞鸥的围剿撤离。',
+        href: '射击.html',
+        cta: '▶ 立即出击',
+        art: '🎯',
+        glow: 'rgba(251, 146, 60, 0.28)'
+      },
+      {
+        label: '未来赛车',
+        eyebrow: '🏎️ GitHub 殿堂 WebGL 竞速',
+        title: 'HexGL · 未来反重力赛车',
+        desc: '驾驶超音速反重力飞船驰骋高空科幻都市赛道，精准切弯踩满加速带，挑战最快圈速纪录！',
+        href: '未来竞速/index.html',
+        cta: '▶ 引擎点火',
+        art: '🏎️',
+        glow: 'rgba(56, 189, 248, 0.30)'
+      },
+      {
+        label: '3D 魔方',
+        eyebrow: '🧊 GitHub 高星极简解谜',
+        title: 'The Cube · 3D 极简魔方',
+        desc: '令人爱不释手的丝滑 3D 魔方，支持 2×2 至 5×5 阶数切换、五种高颜值配色与专业平均计时统计。',
+        href: '3D魔方/index.html',
+        cta: '▶ 转动魔方',
+        art: '🧊',
+        glow: 'rgba(129, 140, 248, 0.30)'
+      },
+      {
+        label: '小黑屋',
+        eyebrow: '🔥 传奇文字生存与探索神作',
+        title: 'A Dark Room · 小黑屋（中文版）',
+        desc: '从冰冷黑屋里添柴生火开始，聚拢流民、建立村庄、锻造甲胄，直至揭开浩瀚废土背后的惊人秘密。',
+        href: '小黑屋/index.html',
+        cta: '▶ 点燃火堆',
+        art: '🔥',
+        glow: 'rgba(245, 158, 11, 0.28)'
+      }
+    ];
+
+    const FAV_KEY = 'pixel_arcade_favs_v1';
+    const RECENT_KEY = 'pixel_arcade_recent_v2';
+
+    let activeCat = 'all';
+    let searchQuery = '';
+    let favSet = new Set();
+    let spotIdx = 0;
+    let spotTimer = null;
+
+    try {
+      favSet = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]'));
+    } catch (e) {}
+
+    function saveFavs() {
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify([...favSet]));
+      } catch (e) {}
+    }
+
+    // Spotlight logic
+    function renderSpotlight(idx) {
+      spotIdx = idx;
+      const s = SPOTLIGHTS[idx];
+      document.getElementById('spotEyebrow').textContent = s.eyebrow;
+      document.getElementById('spotTitle').textContent = s.title;
+      document.getElementById('spotDesc').textContent = s.desc;
+      document.getElementById('spotLink').href = s.href;
+      document.getElementById('spotLink').textContent = s.cta;
+      document.getElementById('spotArt').textContent = s.art;
+      document.getElementById('spotlightCard').style.setProperty('--spot-accent', s.glow);
+      document.querySelectorAll('.spot-dot').forEach((btn, i) => {
+        btn.classList.toggle('active', i === idx);
+      });
+    }
+
+    function initSpotlight() {
+      const dotsWrap = document.getElementById('spotDots');
+      dotsWrap.innerHTML = SPOTLIGHTS.map((s, i) =>
+        `<button type="button" class="spot-dot ${i === 0 ? 'active' : ''}" data-idx="${i}">${s.label}</button>`
+      ).join('');
+      dotsWrap.addEventListener('click', (e) => {
+        const btn = e.target.closest('.spot-dot');
+        if (!btn) return;
+        renderSpotlight(Number(btn.dataset.idx));
+        resetSpotTimer();
+      });
+      resetSpotTimer();
+    }
+
+    function resetSpotTimer() {
+      clearInterval(spotTimer);
+      spotTimer = setInterval(() => {
+        renderSpotlight((spotIdx + 1) % SPOTLIGHTS.length);
+      }, 6500);
+    }
+
+    // Recently played
+    function renderRecent() {
+      let recentIds = [];
+      try {
+        recentIds = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      } catch (e) {}
+      const matched = recentIds
+        .map(id => GAMES.find(g => g.id === id || g.href === id))
+        .filter(Boolean)
+        .slice(0, 5);
+      const sec = document.getElementById('recentSection');
+      if (!matched.length) {
+        sec.classList.remove('visible');
+        return;
+      }
+      sec.classList.add('visible');
+      document.getElementById('recentChips').innerHTML = matched.map(g =>
+        `<a class="recent-chip" href="${g.href}"><span>${g.emoji}</span><span>${g.title}</span></a>`
+      ).join('');
+    }
+
+    // Update category badge counts
+    function updateCounts() {
+      document.getElementById('totalMetric').textContent = GAMES.length;
+      const counts = {
+        all: GAMES.length,
+        '3d': GAMES.filter(g => g.cats.includes('3d')).length,
+        github: GAMES.filter(g => g.cats.includes('github')).length,
+        arcade: GAMES.filter(g => g.cats.includes('arcade')).length,
+        puzzle: GAMES.filter(g => g.cats.includes('puzzle')).length,
+        mobile: GAMES.filter(g => g.cats.includes('mobile')).length,
+        fav: GAMES.filter(g => favSet.has(g.id)).length
+      };
+      Object.entries(counts).forEach(([k, v]) => {
+        const el = document.querySelector(`[data-count="${k}"]`);
+        if (el) el.textContent = v;
+      });
+    }
+
+    function matchesGame(g) {
+      if (activeCat === 'fav' && !favSet.has(g.id)) return false;
+      if (activeCat !== 'all' && activeCat !== 'fav' && !g.cats.includes(activeCat)) return false;
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      const hay = (g.title + ' ' + g.desc + ' ' + g.badge + ' ' + g.tags.join(' ')).toLowerCase();
+      return hay.includes(q);
+    }
+
+    function renderGrid() {
+      updateCounts();
+      const list = GAMES.filter(matchesGame);
+      const grid = document.getElementById('gamesGrid');
+      const empty = document.getElementById('emptyState');
+      document.getElementById('resultInfo').textContent = `共展示 ${list.length} 款游戏`;
+
+      if (!list.length) {
+        grid.innerHTML = '';
+        empty.classList.add('visible');
+        return;
+      }
+      empty.classList.remove('visible');
+
+      grid.innerHTML = list.map(g => {
+        const isFav = favSet.has(g.id);
+        return `
+          <a class="game-card" href="${g.href}" data-id="${g.id}" style="--cover-bg:${g.cover};--card-accent:${g.accent}">
+            <div class="card-cover">
+              <div class="cover-top">
+                <span class="source-pill ${g.badgeType}">${g.badge}</span>
+                <button type="button" class="fav-btn ${isFav ? 'active' : ''}" data-fav="${g.id}" title="${isFav ? '取消收藏' : '加入收藏'}" aria-label="收藏">
+                  ${isFav ? '★' : '☆'}
+                </button>
+              </div>
+              <div class="cover-emblem" aria-hidden="true">${g.emoji}</div>
+              <div class="cover-devices" title="支持设备">${g.devices}</div>
+            </div>
+            <div class="card-body">
+              <h3><span>${g.title}</span></h3>
+              <p>${g.desc}</p>
+              <div class="card-footer">
+                <div class="tag-list">
+                  ${g.tags.map(t => `<span class="tag-chip">${t}</span>`).join('')}
+                </div>
+                <span class="launch-text">开玩 →</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function resetFilters() {
+      activeCat = 'all';
+      searchQuery = '';
+      document.getElementById('searchInput').value = '';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all'));
+      renderGrid();
+    }
+
+    // Event bindings
+    document.getElementById('filterTabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('.tab-btn');
+      if (!btn) return;
+      activeCat = btn.dataset.cat;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      renderGrid();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      renderGrid();
+    });
+
+    document.getElementById('gamesGrid').addEventListener('click', (e) => {
+      const favBtn = e.target.closest('.fav-btn');
+      if (favBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = favBtn.dataset.fav;
+        if (favSet.has(id)) favSet.delete(id);
+        else favSet.add(id);
+        saveFavs();
+        renderGrid();
+        return;
+      }
+      const card = e.target.closest('.game-card');
+      if (card) {
+        try {
+          const id = card.dataset.id;
+          let list = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]').filter(x => x !== id);
+          list.unshift(id);
+          localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 8)));
+        } catch (err) {}
+      }
+    });
+
+    document.getElementById('randomBtn').addEventListener('click', () => {
+      const pool = GAMES.filter(matchesGame);
+      const target = (pool.length ? pool : GAMES)[Math.floor(Math.random() * (pool.length || GAMES.length))];
+      if (target) window.location.href = target.href;
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== document.getElementById('searchInput')) {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+    });
+
+    window.addEventListener('pageshow', renderRecent);
+
+    initSpotlight();
+    renderRecent();
+    renderGrid();
+  </script>
+</body>
+</html>

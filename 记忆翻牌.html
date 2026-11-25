@@ -1,2 +1,977 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>记忆翻牌</title><style>*{box-sizing:border-box}body{margin:0;background:#07111f;color:#e9f2ff;font:16px system-ui,-apple-system,"Microsoft YaHei",sans-serif}a{color:inherit;text-decoration:none}.wrap{max-width:1100px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.brand{font-size:22px;font-weight:800}.back{padding:9px 14px;border:1px solid #304968;border-radius:10px;background:#0e2036}.panel{background:#0d1d31;border:1px solid #24405f;border-radius:18px;padding:20px;box-shadow:0 16px 45px #0004}button{font:inherit;color:inherit;background:#163452;border:1px solid #38618a;border-radius:9px;padding:9px 14px;cursor:pointer}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.muted{color:#94acc7}.score{font-size:18px;color:#7de2ff}canvas{display:block;max-width:100%;margin:auto;background:#06101c;border-radius:12px;border:1px solid #284665}.memory{display:grid;grid-template-columns:repeat(4,72px);gap:10px;justify-content:center}.memory button{height:72px;font-size:30px;padding:0}.mine{display:grid;grid-template-columns:repeat(9,34px);gap:3px;justify-content:center}.mine button{width:34px;height:34px;padding:0;font-size:14px}@media(max-width:600px){.wrap{padding:16px}.memory{grid-template-columns:repeat(4,60px)}.memory button{height:60px}.mine{grid-template-columns:repeat(9,28px)}.mine button{width:28px;height:28px}}
-</style></head><body><main class="wrap"><header class="top"><a class="brand" href="index.html">🎮 像素游乐场</a><a class="back" href="index.html">← 返回大厅</a></header><section class="panel"><h1>🧠 记忆翻牌</h1><p class="score">步数：<b id="sc">0</b></p><div id="g" class="memory"></div><div class="actions"><button onclick="newG()">重新开始</button></div></section></main><script>let vals,matched=[],open=[],moves=0,locked=false;function newG(){vals=[...'🍎🍎🍌🍌🍇🍇🍉🍉'].sort(()=>Math.random()-.5);matched=[];open=[];moves=0;locked=false;draw()}function draw(){g.innerHTML=vals.map((v,i)=>`<button onclick="flip(${i})">${matched.includes(i)||open.includes(i)?v:'?'}</button>`).join('');sc.textContent=moves}function flip(i){if(locked||matched.includes(i)||open.includes(i))return;open.push(i);draw();if(open.length===2){moves++;locked=true;let [a,b]=open;if(vals[a]===vals[b]){matched.push(a,b);open=[];locked=false;draw();if(matched.length===vals.length)setTimeout(()=>alert('完成！共 '+moves+' 步'),100)}else setTimeout(()=>{open=[];locked=false;draw()},700)}}newG();</script></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>星辰记忆翻牌 — 像素游乐场</title>
+  <link rel="stylesheet" href="assets/arcade-shell.css">
+  <script src="assets/arcade-sfx.js"></script>
+  <style>
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stage-box {
+      position: relative;
+      border-radius: 20px;
+      padding: 22px 18px;
+      background:
+        radial-gradient(600px 320px at 50% 0%, rgba(92, 225, 230, 0.08), transparent 70%),
+        linear-gradient(180deg, rgba(7, 13, 27, 0.92), rgba(10, 19, 36, 0.96));
+      border: 1px solid rgba(120, 175, 255, 0.2);
+      box-shadow: inset 0 2px 16px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .combo-toast-bar {
+      height: 28px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .combo-toast {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.24), rgba(236, 72, 153, 0.24));
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      color: #fde68a;
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.28);
+      animation: comboPop 260ms cubic-bezier(0.2, 1.2, 0.3, 1);
+    }
+
+    .combo-idle-hint {
+      font-size: 12.5px;
+      color: var(--text-dim);
+    }
+
+    @keyframes comboPop {
+      0% { opacity: 0; transform: scale(0.65) translateY(6px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Card Grid */
+    .cards-grid {
+      display: grid;
+      width: 100%;
+      max-width: 520px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 0 auto;
+    }
+
+    .cards-grid[data-diff="hard"] {
+      max-width: 690px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 11px;
+    }
+
+    /* Genuine 3D Flip Scene */
+    .card-slot {
+      perspective: 900px;
+      aspect-ratio: 3 / 3.6;
+      min-height: 88px;
+    }
+
+    .card-btn {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      user-select: none;
+      outline: none;
+    }
+
+    .card-slot:hover .card-btn:not(.is-flipped):not(.is-matched) {
+      transform: translateY(-3px) rotateX(4deg);
+    }
+
+    .card-btn.is-flipped,
+    .card-btn.is-matched {
+      transform: rotateY(180deg);
+      cursor: default;
+    }
+
+    .card-btn.is-mismatch {
+      animation: mismatchWobble 380ms ease;
+    }
+
+    @keyframes mismatchWobble {
+      0%, 100% { transform: rotateY(180deg) translateX(0); }
+      25% { transform: rotateY(180deg) translateX(-5px); }
+      75% { transform: rotateY(180deg) translateX(5px); }
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Intricate Geometric Card Back */
+    .card-back {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(92, 225, 230, 0.16) 0%, transparent 58%),
+        repeating-linear-gradient(45deg, rgba(91, 157, 255, 0.07) 0 2px, transparent 2px 10px),
+        repeating-linear-gradient(-45deg, rgba(167, 139, 250, 0.07) 0 2px, transparent 2px 10px),
+        linear-gradient(155deg, #132544 0%, #0b162c 100%);
+      border: 1px solid rgba(120, 185, 255, 0.34);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.36),
+        inset 0 0 0 4px rgba(8, 16, 32, 0.65),
+        inset 0 0 0 5px rgba(92, 225, 230, 0.18);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card-slot:hover .card-back {
+      border-color: rgba(92, 225, 230, 0.72);
+      box-shadow:
+        0 10px 24px rgba(6, 182, 212, 0.22),
+        inset 0 0 0 4px rgba(8, 16, 32, 0.65),
+        inset 0 0 0 5px rgba(92, 225, 230, 0.38);
+    }
+
+    /* Theme variations on card back accent */
+    .cards-grid[data-theme="fantasy"] .card-back {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.2) 0%, transparent 58%),
+        repeating-linear-gradient(45deg, rgba(244, 114, 182, 0.07) 0 2px, transparent 2px 10px),
+        repeating-linear-gradient(-45deg, rgba(167, 139, 250, 0.08) 0 2px, transparent 2px 10px),
+        linear-gradient(155deg, #21183c 0%, #110d24 100%);
+      border-color: rgba(196, 181, 253, 0.36);
+    }
+
+    .cards-grid[data-theme="cyber"] .card-back {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(52, 211, 153, 0.16) 0%, transparent 58%),
+        repeating-linear-gradient(0deg, rgba(92, 225, 230, 0.06) 0 1px, transparent 1px 8px),
+        repeating-linear-gradient(90deg, rgba(92, 225, 230, 0.06) 0 1px, transparent 1px 8px),
+        linear-gradient(155deg, #0f292e 0%, #091521 100%);
+      border-color: rgba(52, 211, 153, 0.38);
+    }
+
+    .back-mandala {
+      width: 54%;
+      height: 54%;
+      max-width: 56px;
+      max-height: 56px;
+      opacity: 0.78;
+      stroke: var(--cyan);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .cards-grid[data-theme="fantasy"] .back-mandala { stroke: #c4b5fd; }
+    .cards-grid[data-theme="cyber"] .back-mandala { stroke: #34d399; }
+
+    .card-slot:hover .back-mandala {
+      transform: rotate(15deg) scale(1.06);
+      opacity: 1;
+    }
+
+    /* Glowing Colorful Emblem Card Front */
+    .card-front {
+      transform: rotateY(180deg);
+      background:
+        radial-gradient(circle at 50% 38%, var(--emblem-glow, rgba(92, 225, 230, 0.32)), transparent 68%),
+        linear-gradient(165deg, #16294a 0%, #0b162a 100%);
+      border: 1.5px solid var(--emblem-accent, #5ce1e6);
+      box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.4),
+        inset 0 0 18px var(--emblem-glow, rgba(92, 225, 230, 0.2));
+      padding: 6px;
+      gap: 6px;
+    }
+
+    .card-front::before {
+      content: "✦";
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      font-size: 10px;
+      color: var(--emblem-accent, #5ce1e6);
+      opacity: 0.75;
+    }
+
+    .card-front::after {
+      content: "✦";
+      position: absolute;
+      bottom: 6px;
+      right: 8px;
+      font-size: 10px;
+      color: var(--emblem-accent, #5ce1e6);
+      opacity: 0.75;
+    }
+
+    .emblem-orb {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: clamp(26px, 4vw, 34px);
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 0 18px var(--emblem-glow, rgba(92, 225, 230, 0.35));
+      transition: transform 0.25s ease;
+    }
+
+    .emblem-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #e8f3ff;
+      opacity: 0.92;
+    }
+
+    .card-btn.is-matched .card-front {
+      border-color: #34d399;
+      box-shadow:
+        0 0 24px rgba(52, 211, 153, 0.42),
+        inset 0 0 20px rgba(52, 211, 153, 0.22);
+      animation: matchCelebrate 420ms cubic-bezier(0.2, 1.25, 0.4, 1);
+    }
+
+    .card-btn.is-matched .emblem-orb {
+      transform: scale(1.06);
+    }
+
+    @keyframes matchCelebrate {
+      0% { transform: rotateY(180deg) scale(1); }
+      50% { transform: rotateY(180deg) scale(1.09); }
+      100% { transform: rotateY(180deg) scale(1); }
+    }
+
+    /* Confetti Canvas & Victory Stars */
+    .confetti-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 25;
+    }
+
+    .star-rating {
+      display: flex;
+      gap: 10px;
+      font-size: 36px;
+      margin: 4px 0;
+    }
+
+    .star-item {
+      filter: grayscale(1) opacity(0.28);
+      transform: scale(0.8);
+      transition: transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1), filter 0.35s ease;
+    }
+
+    .star-item.lit {
+      filter: drop-shadow(0 0 14px rgba(251, 191, 36, 0.78));
+      transform: scale(1.1);
+    }
+
+    .win-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(76px, 1fr));
+      gap: 10px;
+      width: 100%;
+      max-width: 340px;
+      margin: 6px 0 8px;
+    }
+
+    .win-stat-box {
+      padding: 8px 10px;
+      border-radius: 11px;
+      background: rgba(15, 29, 54, 0.85);
+      border: 1px solid rgba(120, 175, 255, 0.22);
+    }
+
+    .win-stat-box .k {
+      display: block;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .win-stat-box .v {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    @media (max-width: 620px) {
+      .toolbar-row {
+        justify-content: center;
+      }
+      .stage-box {
+        padding: 14px 10px;
+      }
+      .cards-grid {
+        gap: 8px;
+      }
+      .cards-grid[data-diff="hard"] {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+      .emblem-orb {
+        width: 42px;
+        height: 42px;
+        font-size: 24px;
+      }
+      .emblem-label {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="arcade-page">
+    <header class="arcade-topbar">
+      <a class="arcade-brand" href="index.html">
+        <span class="arcade-brand-mark">🎮</span>
+        <span>像素游乐场</span>
+      </a>
+      <div class="arcade-nav-actions">
+        <button class="btn btn-ghost btn-sm" id="muteBtn" type="button">🔊 音效</button>
+        <a class="btn btn-ghost btn-sm" href="index.html">← 返回大厅</a>
+      </div>
+    </header>
+
+    <main class="game-shell">
+      <div class="game-header">
+        <div class="game-title-group">
+          <div class="game-icon">🃏</div>
+          <div>
+            <h1>星辰记忆翻牌</h1>
+            <p class="game-subtitle">3D 幻彩星纹卡牌 · 连续配对触发连击高分加成</p>
+          </div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-pill">
+            <span class="label">✨ 得分</span>
+            <span class="value" id="scoreVal">0</span>
+          </div>
+          <div class="stat-pill emerald">
+            <span class="label">👣 步数</span>
+            <span class="value" id="movesVal">0</span>
+          </div>
+          <div class="stat-pill rose">
+            <span class="label">🔥 连击</span>
+            <span class="value" id="comboVal">×0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">⏱️ 用时</span>
+            <span class="value" id="timeVal">00s</span>
+          </div>
+          <div class="stat-pill amber">
+            <span class="label">🏆 最高分</span>
+            <span class="value" id="bestVal">--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-row">
+        <div class="toolbar-group">
+          <div class="seg-group" id="diffGroup" role="tablist" aria-label="难度选择">
+            <button class="seg-btn active" type="button" data-diff="easy">轻松 4×3 (6对)</button>
+            <button class="seg-btn" type="button" data-diff="normal">标准 4×4 (8对)</button>
+            <button class="seg-btn" type="button" data-diff="hard">大师 6×4 (12对)</button>
+          </div>
+
+          <div class="seg-group" id="themeGroup" role="tablist" aria-label="卡面主题">
+            <button class="seg-btn active" type="button" data-theme="space">🚀 星际探索</button>
+            <button class="seg-btn" type="button" data-theme="fantasy">🦊 奇幻生灵</button>
+            <button class="seg-btn" type="button" data-theme="cyber">💎 赛博秘宝</button>
+          </div>
+        </div>
+
+        <div class="toolbar-group">
+          <button class="btn btn-primary btn-sm" id="restartBtn" type="button">↻ 重新洗牌</button>
+        </div>
+      </div>
+
+      <div class="stage-box" id="stageBox">
+        <div class="combo-toast-bar" id="comboBar">
+          <span class="combo-idle-hint">翻开两张相同徽章即可消除，连续配对享受连击加分！</span>
+        </div>
+
+        <div class="cards-grid" id="cardsGrid" data-diff="easy" data-theme="space"></div>
+
+        <canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+        <div class="modal-overlay hidden" id="winOverlay">
+          <span class="modal-badge" id="winBadge">🌟 PERFECT MEMORY</span>
+          <div class="star-rating" id="starRating">
+            <span class="star-item">⭐</span>
+            <span class="star-item">⭐</span>
+            <span class="star-item">⭐</span>
+          </div>
+          <h2 id="winTitle">星辰共鸣达成！</h2>
+          <div class="win-stats-grid">
+            <div class="win-stat-box">
+              <span class="k">总得分</span>
+              <span class="v" id="winScore">0</span>
+            </div>
+            <div class="win-stat-box">
+              <span class="k">总步数</span>
+              <span class="v" id="winMoves">0</span>
+            </div>
+            <div class="win-stat-box">
+              <span class="k">最高连击</span>
+              <span class="v" id="winMaxCombo">×1</span>
+            </div>
+          </div>
+          <p id="winSummary">用时 0 秒，最佳步数纪录 -- 步。</p>
+          <button class="btn btn-primary" id="playAgainBtn" type="button">✨ 再玩一局</button>
+        </div>
+      </div>
+
+      <div class="kbd-hints">
+        <span>🃏 点击任意卡牌翻面，记住徽章位置</span>
+        <span>🔥 <strong>连续命中</strong>触发 Combo 倍率加成</span>
+        <span>⭐⭐⭐ 步数越少，通关星级越高</span>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      ArcadeSFX.recordPlay('记忆翻牌.html');
+
+      const DIFFS = {
+        easy:   { key: 'easy',   name: '轻松 4×3', pairs: 6,  threeStar: 9,  twoStar: 13 },
+        normal: { key: 'normal', name: '标准 4×4', pairs: 8,  threeStar: 13, twoStar: 18 },
+        hard:   { key: 'hard',   name: '大师 6×4', pairs: 12, threeStar: 20, twoStar: 28 }
+      };
+
+      const THEMES = {
+        space: [
+          { icon: '🚀', label: '星际飞船', accent: '#38bdf8', glow: 'rgba(56, 189, 248, 0.34)' },
+          { icon: '🪐', label: '光环土星', accent: '#fbbf24', glow: 'rgba(251, 191, 36, 0.34)' },
+          { icon: '☄️', label: '极速彗星', accent: '#fb7185', glow: 'rgba(251, 113, 133, 0.34)' },
+          { icon: '🛸', label: '引力飞碟', accent: '#34d399', glow: 'rgba(52, 211, 153, 0.34)' },
+          { icon: '🌙', label: '银白弯月', accent: '#a78bfa', glow: 'rgba(167, 139, 250, 0.34)' },
+          { icon: '🌟', label: '超新星芒', accent: '#fde047', glow: 'rgba(253, 224, 71, 0.34)' },
+          { icon: '🛰️', label: '深空卫星', accent: '#60a5fa', glow: 'rgba(96, 165, 250, 0.34)' },
+          { icon: '🌌', label: '旋涡星系', accent: '#c084fc', glow: 'rgba(192, 132, 252, 0.34)' },
+          { icon: '🔭', label: '巡天透镜', accent: '#2dd4bf', glow: 'rgba(45, 212, 191, 0.34)' },
+          { icon: '☀️', label: '烈日恒星', accent: '#f97316', glow: 'rgba(249, 115, 22, 0.36)' },
+          { icon: '👽', label: '星外访客', accent: '#4ade80', glow: 'rgba(74, 222, 128, 0.34)' },
+          { icon: '🌍', label: '蔚蓝母星', accent: '#22d3ee', glow: 'rgba(34, 211, 238, 0.34)' }
+        ],
+        fantasy: [
+          { icon: '🦊', label: '九尾灵狐', accent: '#fb923c', glow: 'rgba(251, 146, 60, 0.35)' },
+          { icon: '🐉', label: '苍穹青龙', accent: '#34d399', glow: 'rgba(52, 211, 153, 0.35)' },
+          { icon: '🦄', label: '幻梦独角', accent: '#f472b6', glow: 'rgba(244, 114, 182, 0.35)' },
+          { icon: '🦉', label: '秘林夜枭', accent: '#a78bfa', glow: 'rgba(167, 139, 250, 0.35)' },
+          { icon: '🦋', label: '琉璃幻蝶', accent: '#38bdf8', glow: 'rgba(56, 189, 248, 0.35)' },
+          { icon: '🦚', label: '翠羽孔雀', accent: '#2dd4bf', glow: 'rgba(45, 212, 191, 0.35)' },
+          { icon: '🐬', label: '星海白豚', accent: '#60a5fa', glow: 'rgba(96, 165, 250, 0.35)' },
+          { icon: '🦩', label: '绯霞火鹤', accent: '#fb7185', glow: 'rgba(251, 113, 133, 0.35)' },
+          { icon: '🐺', label: '霜月银狼', accent: '#93c5fd', glow: 'rgba(147, 197, 253, 0.35)' },
+          { icon: '🦌', label: '森之灵鹿', accent: '#fbbf24', glow: 'rgba(251, 191, 36, 0.35)' },
+          { icon: '🦁', label: '黄金圣狮', accent: '#f59e0b', glow: 'rgba(245, 158, 11, 0.35)' },
+          { icon: '🐙', label: '深渊章鱼', accent: '#c084fc', glow: 'rgba(192, 132, 252, 0.35)' }
+        ],
+        cyber: [
+          { icon: '💎', label: '以太晶钻', accent: '#38bdf8', glow: 'rgba(56, 189, 248, 0.36)' },
+          { icon: '⚡', label: '超载电弧', accent: '#facc15', glow: 'rgba(250, 204, 21, 0.36)' },
+          { icon: '🔮', label: '全息魔球', accent: '#c084fc', glow: 'rgba(192, 132, 252, 0.36)' },
+          { icon: '🗡️', label: '光子短刃', accent: '#fb7185', glow: 'rgba(251, 113, 133, 0.36)' },
+          { icon: '🛡️', label: '矩阵力场', accent: '#60a5fa', glow: 'rgba(96, 165, 250, 0.36)' },
+          { icon: '👑', label: '霓虹王冠', accent: '#fbbf24', glow: 'rgba(251, 191, 36, 0.36)' },
+          { icon: '🧬', label: '基因螺旋', accent: '#34d399', glow: 'rgba(52, 211, 153, 0.36)' },
+          { icon: '🧿', label: '洞察之眼', accent: '#22d3ee', glow: 'rgba(34, 211, 238, 0.36)' },
+          { icon: '🗝️', label: '秘钥核心', accent: '#f59e0b', glow: 'rgba(245, 158, 11, 0.36)' },
+          { icon: '⚙️', label: '精密齿轮', accent: '#94a3b8', glow: 'rgba(148, 163, 184, 0.36)' },
+          { icon: '🔋', label: '聚变电池', accent: '#4ade80', glow: 'rgba(74, 222, 128, 0.36)' },
+          { icon: '💿', label: '神经光盘', accent: '#f472b6', glow: 'rgba(244, 114, 182, 0.36)' }
+        ]
+      };
+
+      const BACK_SVG =
+        '<svg class="back-mandala" viewBox="0 0 64 64" fill="none" stroke-width="1.8">' +
+          '<circle cx="32" cy="32" r="24" stroke-opacity="0.45"/>' +
+          '<rect x="15" y="15" width="34" height="34" rx="4" transform="rotate(45 32 32)" stroke-opacity="0.7"/>' +
+          '<rect x="17" y="17" width="30" height="30" rx="3" stroke-opacity="0.55"/>' +
+          '<path d="M32 8 L37 27 L56 32 L37 37 L32 56 L27 37 L8 32 L27 27 Z" stroke-opacity="0.9"/>' +
+          '<circle cx="32" cy="32" r="5" fill="currentColor" fill-opacity="0.25"/>' +
+        '</svg>';
+
+      const muteBtn = document.getElementById('muteBtn');
+      const scoreValEl = document.getElementById('scoreVal');
+      const movesValEl = document.getElementById('movesVal');
+      const comboValEl = document.getElementById('comboVal');
+      const timeValEl = document.getElementById('timeVal');
+      const bestValEl = document.getElementById('bestVal');
+      const diffGroup = document.getElementById('diffGroup');
+      const themeGroup = document.getElementById('themeGroup');
+      const restartBtn = document.getElementById('restartBtn');
+      const comboBar = document.getElementById('comboBar');
+      const cardsGrid = document.getElementById('cardsGrid');
+      const stageBox = document.getElementById('stageBox');
+      const confettiCanvas = document.getElementById('confettiCanvas');
+      const winOverlay = document.getElementById('winOverlay');
+      const winBadge = document.getElementById('winBadge');
+      const winTitle = document.getElementById('winTitle');
+      const winScore = document.getElementById('winScore');
+      const winMoves = document.getElementById('winMoves');
+      const winMaxCombo = document.getElementById('winMaxCombo');
+      const winSummary = document.getElementById('winSummary');
+      const starRating = document.getElementById('starRating');
+      const playAgainBtn = document.getElementById('playAgainBtn');
+
+      let currentDiff = DIFFS.easy;
+      let currentTheme = 'space';
+      let deck = [];          // { pairId, icon, label, accent, glow, matched }
+      let cardButtons = [];   // HTMLButtonElement[]
+      let flippedIndices = [];
+      let locked = false;
+      let matchedPairs = 0;
+      let moves = 0;
+      let score = 0;
+      let combo = 0;
+      let maxCombo = 0;
+      let elapsedSec = 0;
+      let timerStarted = false;
+      let timerId = null;
+
+      function syncMuteBtn() {
+        muteBtn.textContent = ArcadeSFX.isMuted() ? '🔇 静音' : '🔊 音效';
+      }
+      syncMuteBtn();
+      muteBtn.addEventListener('click', function () {
+        ArcadeSFX.toggleMute();
+        syncMuteBtn();
+      });
+
+      function storageKey(diffKey) {
+        return 'pixel_memory_best_v2_' + diffKey;
+      }
+
+      function loadBest(diffKey) {
+        try {
+          const raw = localStorage.getItem(storageKey(diffKey));
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function saveBest(diffKey, data) {
+        try {
+          localStorage.setItem(storageKey(diffKey), JSON.stringify(data));
+        } catch (e) {}
+      }
+
+      function stopTimer() {
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+      }
+
+      function ensureTimerRunning() {
+        if (timerStarted) return;
+        timerStarted = true;
+        stopTimer();
+        timerId = setInterval(function () {
+          elapsedSec++;
+          timeValEl.textContent = String(elapsedSec).padStart(2, '0') + 's';
+        }, 1000);
+      }
+
+      function updateHUD() {
+        scoreValEl.textContent = String(score);
+        movesValEl.textContent = String(moves);
+        comboValEl.textContent = '×' + combo;
+        timeValEl.textContent = String(elapsedSec).padStart(2, '0') + 's';
+
+        const best = loadBest(currentDiff.key);
+        bestValEl.textContent = best ? String(best.score) : '--';
+      }
+
+      function showComboToast(comboNum, pts) {
+        if (comboNum >= 2) {
+          comboBar.innerHTML =
+            '<span class="combo-toast">🔥 连击 Combo ×' + comboNum + ' · +' + pts + ' 分！</span>';
+        } else {
+          comboBar.innerHTML =
+            '<span class="combo-idle-hint" style="color:var(--emerald)">✨ 配对成功 +' + pts + ' 分！继续命中可触发连击！</span>';
+        }
+      }
+
+      function resetComboToast() {
+        comboBar.innerHTML =
+          '<span class="combo-idle-hint">翻开两张相同徽章即可消除，连续配对享受连击加分！</span>';
+      }
+
+      function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = (Math.random() * (i + 1)) | 0;
+          const tmp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = tmp;
+        }
+        return arr;
+      }
+
+      function buildGame() {
+        stopTimer();
+        stopConfetti();
+        winOverlay.classList.add('hidden');
+
+        flippedIndices = [];
+        locked = false;
+        matchedPairs = 0;
+        moves = 0;
+        score = 0;
+        combo = 0;
+        maxCombo = 0;
+        elapsedSec = 0;
+        timerStarted = false;
+
+        resetComboToast();
+
+        cardsGrid.dataset.diff = currentDiff.key;
+        cardsGrid.dataset.theme = currentTheme;
+
+        const pool = THEMES[currentTheme].slice(0, currentDiff.pairs);
+        deck = [];
+        for (let i = 0; i < pool.length; i++) {
+          const item = pool[i];
+          deck.push({ pairId: i, icon: item.icon, label: item.label, accent: item.accent, glow: item.glow, matched: false });
+          deck.push({ pairId: i, icon: item.icon, label: item.label, accent: item.accent, glow: item.glow, matched: false });
+        }
+        shuffleArray(deck);
+
+        cardButtons = [];
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < deck.length; i++) {
+          const card = deck[i];
+          const slot = document.createElement('div');
+          slot.className = 'card-slot';
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'card-btn';
+          btn.dataset.idx = String(i);
+          btn.setAttribute('aria-label', '星辰卡牌 ' + (i + 1));
+          btn.style.setProperty('--emblem-accent', card.accent);
+          btn.style.setProperty('--emblem-glow', card.glow);
+
+          btn.innerHTML =
+            '<div class="card-face card-back">' + BACK_SVG + '</div>' +
+            '<div class="card-face card-front">' +
+              '<div class="emblem-orb">' + card.icon + '</div>' +
+              '<span class="emblem-label">' + card.label + '</span>' +
+            '</div>';
+
+          slot.appendChild(btn);
+          frag.appendChild(slot);
+          cardButtons.push(btn);
+        }
+
+        cardsGrid.innerHTML = '';
+        cardsGrid.appendChild(frag);
+        updateHUD();
+      }
+
+      function calcStarCount() {
+        if (moves <= currentDiff.threeStar) return 3;
+        if (moves <= currentDiff.twoStar) return 2;
+        return 1;
+      }
+
+      function handleVictory() {
+        stopTimer();
+        // Time efficiency bonus
+        const timeBonus = Math.max(0, (currentDiff.pairs * 10 - elapsedSec) * 4);
+        score += timeBonus;
+
+        const prevBest = loadBest(currentDiff.key);
+        const nextBest = {
+          score: prevBest ? Math.max(prevBest.score, score) : score,
+          moves: prevBest ? Math.min(prevBest.moves, moves) : moves
+        };
+        const isRecord = !prevBest || score > prevBest.score;
+        saveBest(currentDiff.key, nextBest);
+        updateHUD();
+
+        const stars = calcStarCount();
+        ArcadeSFX.play('win');
+        launchConfetti();
+
+        const starEls = starRating.querySelectorAll('.star-item');
+        starEls.forEach(function (s) { s.classList.remove('lit'); });
+
+        setTimeout(function () {
+          winBadge.textContent = isRecord ? '🏆 NEW HIGH SCORE' : '🌟 STAGE CLEAR';
+          winTitle.textContent = stars === 3 ? '超凡记忆 · 完美三星！' : stars === 2 ? '星辰共鸣 · 出色通关！' : '记忆觉醒 · 顺利完成！';
+          winScore.textContent = String(score);
+          winMoves.textContent = moves + ' 步';
+          winMaxCombo.textContent = '×' + Math.max(1, maxCombo);
+          winSummary.textContent = '用时 ' + elapsedSec + ' 秒 · 本难度最少步数纪录 ' + nextBest.moves + ' 步';
+          winOverlay.classList.remove('hidden');
+
+          for (let i = 0; i < stars; i++) {
+            (function (idx) {
+              setTimeout(function () {
+                starEls[idx].classList.add('lit');
+              }, 140 + idx * 160);
+            })(i);
+          }
+        }, 380);
+      }
+
+      function onCardClick(idx) {
+        if (locked) return;
+        const card = deck[idx];
+        if (!card || card.matched) return;
+        if (flippedIndices.indexOf(idx) !== -1) return;
+
+        ensureTimerRunning();
+
+        const btn = cardButtons[idx];
+        btn.classList.remove('is-mismatch');
+        btn.classList.add('is-flipped');
+        flippedIndices.push(idx);
+        ArcadeSFX.play('click');
+
+        if (flippedIndices.length < 2) return;
+
+        moves++;
+        locked = true;
+        const idxA = flippedIndices[0];
+        const idxB = flippedIndices[1];
+        const cardA = deck[idxA];
+        const cardB = deck[idxB];
+
+        if (cardA.pairId === cardB.pairId) {
+          // Match!
+          cardA.matched = true;
+          cardB.matched = true;
+          matchedPairs++;
+          combo++;
+          if (combo > maxCombo) maxCombo = combo;
+
+          const gained = 100 + (combo - 1) * 60;
+          score += gained;
+          showComboToast(combo, gained);
+          updateHUD();
+
+          setTimeout(function () {
+            cardButtons[idxA].classList.add('is-matched');
+            cardButtons[idxB].classList.add('is-matched');
+            if (combo >= 3) {
+              ArcadeSFX.play('power');
+            } else {
+              ArcadeSFX.play('merge', combo + 2);
+            }
+            flippedIndices = [];
+            locked = false;
+
+            if (matchedPairs === currentDiff.pairs) {
+              handleVictory();
+            }
+          }, 220);
+        } else {
+          // Mismatch
+          combo = 0;
+          comboBar.innerHTML = '<span class="combo-idle-hint">未命中，连击已重置，再试一次！</span>';
+          updateHUD();
+
+          setTimeout(function () {
+            cardButtons[idxA].classList.add('is-mismatch');
+            cardButtons[idxB].classList.add('is-mismatch');
+            ArcadeSFX.tone(240, 'triangle', 0.1, 0.07, 180);
+          }, 280);
+
+          setTimeout(function () {
+            cardButtons[idxA].classList.remove('is-flipped', 'is-mismatch');
+            cardButtons[idxB].classList.remove('is-flipped', 'is-mismatch');
+            flippedIndices = [];
+            locked = false;
+          }, 760);
+        }
+      }
+
+      // Celebratory Canvas Confetti
+      let confettiParticles = [];
+      let confettiRaf = null;
+
+      function stopConfetti() {
+        if (confettiRaf) {
+          cancelAnimationFrame(confettiRaf);
+          confettiRaf = null;
+        }
+        confettiParticles = [];
+        const ctx = confettiCanvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      }
+
+      function launchConfetti() {
+        stopConfetti();
+        const rect = stageBox.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        confettiCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        confettiCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        const ctx = confettiCanvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const colors = ['#5ce1e6', '#fbbf24', '#fb7185', '#34d399', '#a78bfa', '#60a5fa'];
+        const count = 85;
+        for (let i = 0; i < count; i++) {
+          confettiParticles.push({
+            x: rect.width * (0.2 + Math.random() * 0.6),
+            y: rect.height * 0.35,
+            vx: (Math.random() - 0.5) * 9.5,
+            vy: -Math.random() * 8 - 3.5,
+            w: 6 + Math.random() * 5,
+            h: 4 + Math.random() * 4,
+            rot: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 0.25,
+            color: colors[i % colors.length],
+            life: 1
+          });
+        }
+
+        function tick() {
+          ctx.clearRect(0, 0, rect.width, rect.height);
+          let alive = 0;
+          for (let i = 0; i < confettiParticles.length; i++) {
+            const p = confettiParticles[i];
+            if (p.life <= 0) continue;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.22;
+            p.vx *= 0.99;
+            p.rot += p.vRot;
+            p.life -= 0.0085;
+            if (p.y < rect.height + 20 && p.life > 0) {
+              alive++;
+              ctx.save();
+              ctx.globalAlpha = Math.max(0, p.life);
+              ctx.translate(p.x, p.y);
+              ctx.rotate(p.rot);
+              ctx.fillStyle = p.color;
+              ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+              ctx.restore();
+            }
+          }
+          if (alive > 0) {
+            confettiRaf = requestAnimationFrame(tick);
+          } else {
+            confettiRaf = null;
+          }
+        }
+        confettiRaf = requestAnimationFrame(tick);
+      }
+
+      // Event wiring
+      cardsGrid.addEventListener('click', function (e) {
+        const btn = e.target.closest('.card-btn');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx, 10);
+        onCardClick(idx);
+      });
+
+      diffGroup.addEventListener('click', function (e) {
+        const btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        const key = btn.dataset.diff;
+        if (!DIFFS[key] || DIFFS[key] === currentDiff) return;
+        currentDiff = DIFFS[key];
+        document.querySelectorAll('#diffGroup .seg-btn').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.diff === key);
+        });
+        ArcadeSFX.play('click');
+        buildGame();
+      });
+
+      themeGroup.addEventListener('click', function (e) {
+        const btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        const th = btn.dataset.theme;
+        if (!THEMES[th] || th === currentTheme) return;
+        currentTheme = th;
+        document.querySelectorAll('#themeGroup .seg-btn').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.theme === th);
+        });
+        ArcadeSFX.play('click');
+        // Update visuals live without resetting current game progress!
+        cardsGrid.dataset.theme = currentTheme;
+        const pool = THEMES[currentTheme];
+        for (let i = 0; i < deck.length; i++) {
+          const card = deck[i];
+          const tpl = pool[card.pairId];
+          card.icon = tpl.icon;
+          card.label = tpl.label;
+          card.accent = tpl.accent;
+          card.glow = tpl.glow;
+          const b = cardButtons[i];
+          if (b) {
+            b.style.setProperty('--emblem-accent', card.accent);
+            b.style.setProperty('--emblem-glow', card.glow);
+            const orb = b.querySelector('.emblem-orb');
+            const lbl = b.querySelector('.emblem-label');
+            if (orb) orb.textContent = card.icon;
+            if (lbl) lbl.textContent = card.label;
+          }
+        }
+      });
+
+      restartBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        buildGame();
+      });
+
+      playAgainBtn.addEventListener('click', function () {
+        ArcadeSFX.play('click');
+        buildGame();
+      });
+
+      buildGame();
+    })();
+  </script>
+</body>
+</html>
